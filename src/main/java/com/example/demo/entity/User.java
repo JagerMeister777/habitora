@@ -15,12 +15,13 @@ public class User extends BaseEntity {
 	private LocalDateTime registeredAt;
 	private Boolean isDeleted;
 	
-	public User(String name, String email, String password, String nickname, LocalDateTime registeredAt) {
+	public User(String name, String email, String password, String nickname) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
 		this.nickname = nickname;
-		this.registeredAt = registeredAt;
+		this.registeredAt = LocalDateTime.now();
+		this.isDeleted = false;
 	}
 	
 	@Override
