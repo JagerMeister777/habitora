@@ -7,8 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class User {
-	private Long id;
+public class User extends BaseEntity {
 	private String name;
 	private String email;
 	private String password;
@@ -26,6 +25,10 @@ public class User {
 	
 	@Override
 	public String toString() {
-		return "名前 : " + name + " | メールアドレス : " + email + " | ニックネーム : " + nickname + " | 登録日 : " + registeredAt;
+		return super.toString() + 
+				"名前 : " + name + 
+				" | メールアドレス : " + email + 
+				" | ニックネーム : " + nickname + 
+				" | 登録日 : " + registeredAt;
 	}
 }
