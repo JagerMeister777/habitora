@@ -21,6 +21,9 @@ public class PostService {
 	
 	
 	public void createPost(CreatePostDto dto) {
+		// TODO modeロジック実装（別メソッドで共通化）
+		// TODO modeをenumクラスで定義
+		// TODO 天気をenumクラスで定義
 		String mode = "";
 		
 		Post createPost = new Post(

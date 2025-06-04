@@ -24,6 +24,7 @@ public class Post extends BaseEntity {
 	
 	public Post() {}
 	
+	// TODO userIdを追加
 	public Post(String text, Integer feelingScore, String mode, List<String> emotionKeywords, Boolean isVisible, LocalDateTime createdAt) {
 		this.text = text;
 		this.feelingScore = feelingScore;
@@ -33,6 +34,7 @@ public class Post extends BaseEntity {
 		this.createdAt = createdAt;
 	}
 	
+	// TODO toStringの実装
 	@Override
 	public String toString() {
 		return super.toString() + "";
