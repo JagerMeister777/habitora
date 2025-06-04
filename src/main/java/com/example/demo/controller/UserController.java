@@ -20,9 +20,9 @@ public class UserController {
 	private final UserService service;
 	
 	@Autowired
-	  public UserController(UserService service) {
-	    this.service = service;
-	  }
+	public UserController(UserService service) {
+		this.service = service;
+	}
 	
 	@GetMapping("/users")
 	public ResponseEntity<List<User>> getUsers() {
@@ -32,8 +32,8 @@ public class UserController {
 	@PostMapping("/users")
 	public ResponseEntity<String> registUser(@RequestBody RegisterUserDto dto) {
 		if (dto.getPassword().equals(dto.getConfirmPass())) {
-			User registerUser = service.registUser(dto);
-			return ResponseEntity.ok((registerUser.getName() + "の登録が完了しました。"));
+			String saveUserName = service.registUser(dto);
+			return ResponseEntity.ok((saveUserName + "の登録が完了しました。"));
 		} else {
 			return ResponseEntity.ok(("パスワードが一致しません。"));
 		}
