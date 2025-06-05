@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
-public class RegisterUserDto {
+public class UpdateUserDto {
 
 	@NotBlank
 	private String name;
@@ -17,7 +17,7 @@ public class RegisterUserDto {
 	private String confirmPass;
 	private String nickname;
 	
-	public RegisterUserDto(String name, String email, String password, String nickname, String confirmPass) {
+	public UpdateUserDto(String name, String email, String password, String nickname, String confirmPass) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
