@@ -1,13 +1,13 @@
-package com.example.demo.service;
+package com.example.demo.post.service;
 
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.Dto.CreatePostDto;
-import com.example.demo.entity.Post;
-import com.example.demo.repository.PostRepository;
+import com.example.demo.post.dto.CreatePostDto;
+import com.example.demo.post.entity.Post;
+import com.example.demo.post.repository.PostRepository;
 
 @Service
 public class PostService {

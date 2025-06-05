@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package com.example.demo.user.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.Dto.RegisterUserDto;
-import com.example.demo.entity.User;
-import com.example.demo.service.UserService;
+import com.example.demo.user.dto.RegisterUserDto;
+import com.example.demo.user.entity.User;
+import com.example.demo.user.service.UserService;
 
 @RestController
 @RequestMapping("/api")
