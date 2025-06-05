@@ -3,12 +3,15 @@ package com.example.demo.user.service;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.user.dto.RegisterUserDto;
 import com.example.demo.user.dto.UpdateUserDto;
 import com.example.demo.user.entity.User;
+import com.example.demo.user.exception.UserNotFoundException;
 import com.example.demo.user.repository.UserRepository;
 import com.example.demo.utility.PasswordEncoder;
 
@@ -32,7 +35,7 @@ public class UserService {
 		return repository.findById(id);
 	}
 	
-	
+	@Transactional
 	public String registUser(RegisterUserDto dto) {
 		User registUser = new User(
 				dto.getName(), 
@@ -55,7 +58,7 @@ public class UserService {
 			repository.save(updateUser.get());
 			return updateUser.get().getName() + " の情報を更新しました。";
 		} else {
-			return "ユーザーが見つかりませんでした。";
+			throw new UserNotFoundException("ユーザーが見つかりませんでした。");
 		}
 	}
 }
