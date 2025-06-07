@@ -26,11 +26,12 @@ public class UserService {
 	}
 	
 	public Optional<User> getUser(Long id) {
-		return repository.findById(id);
+		return Optional.of(repository.findById(id).orElseThrow(() -> new UserNotFoundException("ユーザーが見つかり見つかりませんでした。")));
 	}
 	
 	@Transactional
 	public String createUser(UserRequestDto dto) {
+		// TODO メールアドレス比較、既に登録されている情報であればregistedUserExceptionを発生させる。
 		User registUser = new User(
 				dto.getName(), 
 				dto.getEmail(), 
@@ -45,16 +46,12 @@ public class UserService {
 	@Transactional
 	public String updateUser(Long id, UserRequestDto dto) {
 		Optional<User> updateUser = getUser(id);
-		if (updateUser.isPresent()) {
 			updateUser.get().setName(dto.getName());
 			updateUser.get().setEmail(dto.getEmail());
 			updateUser.get().setNickname(dto.getNickname());
 			updateUser.get().setPassword(dto.getPassword());
 			repository.save(updateUser.get());
 			return updateUser.get().getName() + " の情報を更新しました。";
-		} else {
-			throw new UserNotFoundException("ユーザーが見つかりませんでした。");
-		}
 	}
 	
 	@Transactional

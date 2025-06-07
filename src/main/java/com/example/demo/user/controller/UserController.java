@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.user.dto.UserRequestDto;
 import com.example.demo.user.entity.User;
+import com.example.demo.user.exception.PasswordUnMatchException;
 import com.example.demo.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -40,7 +41,7 @@ public class UserController {
 			String saveUserName = service.createUser(dto);
 			return ResponseEntity.ok((saveUserName + "の登録が完了しました。"));
 		} else {
-			return ResponseEntity.ok(("パスワードが一致しません。"));
+			throw new PasswordUnMatchException("パスワードが一致しませんでした。"); 
 		}
 	}
 	
