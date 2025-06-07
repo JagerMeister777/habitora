@@ -1,19 +1,17 @@
 package com.example.demo.user.service;
 
-import java.util.List;
 import java.util.Optional;
-
-import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.user.dto.RegisterUserDto;
-import com.example.demo.user.dto.UpdateUserDto;
+import com.example.demo.common.util.PasswordEncoder;
+import com.example.demo.user.dto.UserRequestDto;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.exception.UserNotFoundException;
 import com.example.demo.user.repository.UserRepository;
-import com.example.demo.utility.PasswordEncoder;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -27,16 +25,12 @@ public class UserService {
 		this.encoder = encoder;
 	}
 	
-	public List<User> getUsers() {
-		return repository.findAll();
-	}
-	
-	public Optional<User> findByUserId(Long id) {
+	public Optional<User> getUser(Long id) {
 		return repository.findById(id);
 	}
 	
 	@Transactional
-	public String registUser(RegisterUserDto dto) {
+	public String createUser(UserRequestDto dto) {
 		User registUser = new User(
 				dto.getName(), 
 				dto.getEmail(), 
@@ -48,8 +42,9 @@ public class UserService {
 		return saveUser.getName();
 	}
 	
-	public String updateUser(Long id, UpdateUserDto dto) {
-		Optional<User> updateUser = findByUserId(id);
+	@Transactional
+	public String updateUser(Long id, UserRequestDto dto) {
+		Optional<User> updateUser = getUser(id);
 		if (updateUser.isPresent()) {
 			updateUser.get().setName(dto.getName());
 			updateUser.get().setEmail(dto.getEmail());
@@ -60,5 +55,12 @@ public class UserService {
 		} else {
 			throw new UserNotFoundException("ユーザーが見つかりませんでした。");
 		}
+	}
+	
+	@Transactional
+	public String deleteUser(Long id) {
+		// TODO 本番は論理削除
+		repository.deleteById(id);
+		return "id : " + id + " を削除しました。";
 	}
 }

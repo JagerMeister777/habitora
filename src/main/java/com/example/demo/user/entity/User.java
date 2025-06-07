@@ -2,11 +2,10 @@ package com.example.demo.user.entity;
 
 import java.time.LocalDateTime;
 
+import com.example.demo.common.entity.BaseEntity;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-
-import com.example.demo.entity.BaseEntity;
-
 import lombok.Getter;
 import lombok.Setter;
 
