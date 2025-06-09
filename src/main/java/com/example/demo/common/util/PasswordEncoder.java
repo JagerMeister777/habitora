@@ -1,4 +1,4 @@
-package com.example.demo.utility;
+package com.example.demo.common.util;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Component;

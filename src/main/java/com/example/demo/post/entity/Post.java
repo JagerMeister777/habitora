@@ -3,11 +3,10 @@ package com.example.demo.post.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.demo.common.entity.BaseEntity;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-
-import com.example.demo.entity.BaseEntity;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,10 +35,11 @@ public class Post extends BaseEntity {
 		this.createdAt = createdAt;
 	}
 	
-	// TODO toStringの実装
 	@Override
 	public String toString() {
-		return super.toString() + "";
+		return "Post [userId=" + userId + ", text=" + text + ", feelingScore=" + feelingScore + ", mode=" + mode
+				+ ", emotionKeywords=" + emotionKeywords + ", isVisible=" + isVisible + ", createdAt=" + createdAt
+				+ ", id=" + id + "]";
 	}
 	
 }

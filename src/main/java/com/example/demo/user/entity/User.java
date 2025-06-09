@@ -2,11 +2,10 @@ package com.example.demo.user.entity;
 
 import java.time.LocalDateTime;
 
+import com.example.demo.common.entity.BaseEntity;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-
-import com.example.demo.entity.BaseEntity;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,10 +34,7 @@ public class User extends BaseEntity {
 	
 	@Override
 	public String toString() {
-		return super.toString() + 
-				"名前 : " + name + 
-				" | メールアドレス : " + email + 
-				" | ニックネーム : " + nickname + 
-				" | 登録日 : " + registeredAt;
+		return "User [name=" + name + ", email=" + email + ", password=" + password + ", nickname=" + nickname
+				+ ", registeredAt=" + registeredAt + ", isDeleted=" + isDeleted + ", id=" + id + "]";
 	}
 }

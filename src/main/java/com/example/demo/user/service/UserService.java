@@ -1,14 +1,17 @@
 package com.example.demo.user.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.user.dto.RegisterUserDto;
+import com.example.demo.common.util.PasswordEncoder;
+import com.example.demo.user.dto.UserRequestDto;
 import com.example.demo.user.entity.User;
+import com.example.demo.user.exception.ExistsEmailException;
+import com.example.demo.user.exception.UserIsDeletedException;
+import com.example.demo.user.exception.UserNotFoundException;
 import com.example.demo.user.repository.UserRepository;
-import com.example.demo.utility.PasswordEncoder;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -22,20 +25,51 @@ public class UserService {
 		this.encoder = encoder;
 	}
 	
-	public List<User> getUsers() {
-		return repository.findAll();
+	public User getUser(Long id) {
+		User user =  repository.findById(id).orElseThrow(() -> new UserNotFoundException("ユーザーが見つかり見つかりませんでした。"));
+		if (user.getIsDeleted()) {
+			throw new UserIsDeletedException("ユーザーが削除されています。");
+		} else {
+			return user;
+		}
 	}
 	
-	
-	public String registUser(RegisterUserDto dto) {
+	@Transactional
+	public String createUser(UserRequestDto dto) {
+		isExistsEmail(dto.getEmail());
 		User registUser = new User(
 				dto.getName(), 
 				dto.getEmail(), 
 				encoder.hash(dto.getPassword()), 
 				dto.getNickname()
 			);
-		
 		User saveUser = repository.save(registUser);
 		return saveUser.getName();
+	}
+	
+	@Transactional
+	public String updateUser(Long id, UserRequestDto dto) {
+		isExistsEmail(dto.getEmail());
+		User updateUser = getUser(id);
+			updateUser.setName(dto.getName());
+			updateUser.setEmail(dto.getEmail());
+			updateUser.setNickname(dto.getNickname());
+			updateUser.setPassword(dto.getPassword());
+			repository.save(updateUser);
+			return updateUser.getName() + " の情報を更新しました。";
+	}
+	
+	@Transactional
+	public String deleteUser(Long id) {
+		User user = getUser(id);
+		user.setIsDeleted(true);
+		repository.save(user);
+		return "id : " + id + " を削除しました。";
+	}
+	
+	public void isExistsEmail(String email) {
+		if (repository.existsByEmail(email)) {
+			throw new ExistsEmailException("既にメールアドレスが使われています。");
+		}
 	}
 }
