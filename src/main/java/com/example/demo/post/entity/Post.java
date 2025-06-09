@@ -35,10 +35,11 @@ public class Post extends BaseEntity {
 		this.createdAt = createdAt;
 	}
 	
-	// TODO toStringの実装
 	@Override
 	public String toString() {
-		return super.toString() + "";
+		return "Post [userId=" + userId + ", text=" + text + ", feelingScore=" + feelingScore + ", mode=" + mode
+				+ ", emotionKeywords=" + emotionKeywords + ", isVisible=" + isVisible + ", createdAt=" + createdAt
+				+ ", id=" + id + "]";
 	}
 	
 }

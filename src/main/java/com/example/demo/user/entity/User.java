@@ -34,10 +34,7 @@ public class User extends BaseEntity {
 	
 	@Override
 	public String toString() {
-		return super.toString() + 
-				"名前 : " + name + 
-				" | メールアドレス : " + email + 
-				" | ニックネーム : " + nickname + 
-				" | 登録日 : " + registeredAt;
+		return "User [name=" + name + ", email=" + email + ", password=" + password + ", nickname=" + nickname
+				+ ", registeredAt=" + registeredAt + ", isDeleted=" + isDeleted + ", id=" + id + "]";
 	}
 }

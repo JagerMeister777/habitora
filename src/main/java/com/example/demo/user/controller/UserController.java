@@ -1,5 +1,4 @@
 package com.example.demo.user.controller;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +26,15 @@ public class UserController {
 	
 	@Autowired
 	public UserController(UserService service) {
+		super();
 		this.service = service;
 	}
 	
 	@GetMapping("/users/{id}")
-	public ResponseEntity<Optional<User>> getUsers(@PathVariable Long id) {
+	public ResponseEntity<User> getUsers(@PathVariable Long id) {
 		return ResponseEntity.ok(service.getUser(id));
 	}
-	
+
 	@PostMapping("/users")
 	public ResponseEntity<String> createUser(@RequestBody @Valid UserRequestDto dto) {
 		if (dto.getPassword().equals(dto.getConfirmPass())) {
@@ -50,7 +50,6 @@ public class UserController {
 		return ResponseEntity.ok(service.updateUser(id, dto));
 	}
 	
-	// TODO 本番は論理削除
 	@DeleteMapping("/users/{id}")
 	public ResponseEntity<String> deleteUser(@PathVariable Long id) {
 		return ResponseEntity.ok(service.deleteUser(id));
