@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.user.dto.UserRequestDto;
+import com.example.demo.user.dto.UserResponseDto;
 import com.example.demo.user.entity.User;
-import com.example.demo.user.exception.PasswordUnMatchException;
 import com.example.demo.user.service.UserService;
 
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 	
 	private final UserService service;
@@ -36,17 +36,12 @@ public class UserController {
 	}
 
 	@PostMapping()
-	public ResponseEntity<String> createUser(@RequestBody @Valid UserRequestDto dto) {
-		if (dto.getPassword().equals(dto.getConfirmPass())) {
-			String saveUserName = service.createUser(dto);
-			return ResponseEntity.ok((saveUserName + "の登録が完了しました。"));
-		} else {
-			throw new PasswordUnMatchException("パスワードが一致しませんでした。"); 
-		}
+	public ResponseEntity<UserResponseDto> createUser(@RequestBody @Valid UserRequestDto dto) {
+		return ResponseEntity.ok((service.createUser(dto)));
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody @Valid UserRequestDto dto) {
+	public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long id, @RequestBody @Valid UserRequestDto dto) {
 		return ResponseEntity.ok(service.updateUser(id, dto));
 	}
 	

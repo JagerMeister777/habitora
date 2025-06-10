@@ -18,7 +18,7 @@ import com.example.demo.post.service.PostService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/post")
+@RequestMapping("/api/post")
 public class PostController {
 	
 	private final PostService service;

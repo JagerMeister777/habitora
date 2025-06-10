@@ -5,8 +5,10 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.common.util.PasswordEncoder;
 import com.example.demo.user.dto.UserRequestDto;
+import com.example.demo.user.dto.UserResponseDto;
 import com.example.demo.user.entity.User;
 import com.example.demo.user.exception.ExistsEmailException;
+import com.example.demo.user.exception.PasswordUnMatchException;
 import com.example.demo.user.exception.UserIsDeletedException;
 import com.example.demo.user.exception.UserNotFoundException;
 import com.example.demo.user.repository.UserRepository;
@@ -40,8 +42,10 @@ public class UserService {
 	}
 	
 	@Transactional
-	public String createUser(UserRequestDto dto) {
-		if (isExistsEmail(dto.getEmail())) {
+	public UserResponseDto createUser(UserRequestDto dto) {
+		if (isPasswordUnMatching(dto)) {
+			throw new PasswordUnMatchException("パスワードが一致しませんでした。");
+		} else if(isExistsEmail(dto.getEmail())) {
 			throw new ExistsEmailException("既にメールアドレスが使われています。");
 		}
 		User registUser = new User(
@@ -51,19 +55,21 @@ public class UserService {
 				dto.getNickname()
 			);
 		User saveUser = repository.save(registUser);
-		return saveUser.getName();
+		return new UserResponseDto(saveUser.getNickname(), saveUser.getEmail());
 	}
 	
 	@Transactional
-	public String updateUser(Long id, UserRequestDto dto) {
-		isExistsEmail(id, dto.getEmail());
+	public UserResponseDto updateUser(Long id, UserRequestDto dto) {
+		if (isExistsEmail(id, dto.getEmail())) {
+			throw new ExistsEmailException("既にメールアドレスが使われています。");
+		};
 		User updateUser = getUser(id);
 			updateUser.setName(dto.getName());
 			updateUser.setEmail(dto.getEmail());
 			updateUser.setNickname(dto.getNickname());
 			updateUser.setPassword(encoder.hash(dto.getPassword()));
 			repository.save(updateUser);
-			return updateUser.getName() + " の情報を更新しました。";
+			return new UserResponseDto(updateUser.getNickname(), updateUser.getEmail());
 	}
 	
 	@Transactional
@@ -74,14 +80,16 @@ public class UserService {
 		return "id : " + id + " を削除しました。";
 	}
 	
+	public boolean isPasswordUnMatching(UserRequestDto dto) {
+		return dto.getPassword().equals(dto.getConfirmPass()) ? false : true;
+	}
+	
 	public boolean isExistsEmail(String email) {
 		return repository.existsByEmail(email) ? true : false;
 	}
 	
-	public void isExistsEmail(Long userId, String email) {
+	public boolean isExistsEmail(Long userId, String email) {
 		String exsiteEmail = getUser(userId).getEmail();
-		if (!exsiteEmail.equals(email) && isExistsEmail(email)) {
-			throw new ExistsEmailException("既にメールアドレスが使われています。");
-		}
+		return !exsiteEmail.equals(email) && isExistsEmail(email) ? true : false;
 	}
 }
