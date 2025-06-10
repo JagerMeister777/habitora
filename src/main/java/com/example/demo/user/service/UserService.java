@@ -41,7 +41,9 @@ public class UserService {
 	
 	@Transactional
 	public String createUser(UserRequestDto dto) {
-		isExistsEmail(dto.getEmail());
+		if (isExistsEmail(dto.getEmail())) {
+			throw new ExistsEmailException("既にメールアドレスが使われています。");
+		}
 		User registUser = new User(
 				dto.getName(), 
 				dto.getEmail(), 
@@ -54,7 +56,7 @@ public class UserService {
 	
 	@Transactional
 	public String updateUser(Long id, UserRequestDto dto) {
-		isExistsEmail(dto.getEmail());
+		isExistsEmail(id, dto.getEmail());
 		User updateUser = getUser(id);
 			updateUser.setName(dto.getName());
 			updateUser.setEmail(dto.getEmail());
@@ -72,8 +74,13 @@ public class UserService {
 		return "id : " + id + " を削除しました。";
 	}
 	
-	public void isExistsEmail(String email) {
-		if (repository.existsByEmail(email)) {
+	public boolean isExistsEmail(String email) {
+		return repository.existsByEmail(email) ? true : false;
+	}
+	
+	public void isExistsEmail(Long userId, String email) {
+		String exsiteEmail = getUser(userId).getEmail();
+		if (!exsiteEmail.equals(email) && isExistsEmail(email)) {
 			throw new ExistsEmailException("既にメールアドレスが使われています。");
 		}
 	}
