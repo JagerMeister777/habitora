@@ -19,7 +19,7 @@ import com.example.demo.user.service.UserService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/users")
 public class UserController {
 	
 	private final UserService service;
@@ -30,12 +30,12 @@ public class UserController {
 		this.service = service;
 	}
 	
-	@GetMapping("/users/{id}")
+	@GetMapping("/{id}")
 	public ResponseEntity<User> getUsers(@PathVariable Long id) {
 		return ResponseEntity.ok(service.getUser(id));
 	}
 
-	@PostMapping("/users")
+	@PostMapping()
 	public ResponseEntity<String> createUser(@RequestBody @Valid UserRequestDto dto) {
 		if (dto.getPassword().equals(dto.getConfirmPass())) {
 			String saveUserName = service.createUser(dto);
@@ -45,12 +45,12 @@ public class UserController {
 		}
 	}
 	
-	@PutMapping("/users/{id}")
+	@PutMapping("/{id}")
 	public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody @Valid UserRequestDto dto) {
 		return ResponseEntity.ok(service.updateUser(id, dto));
 	}
 	
-	@DeleteMapping("/users/{id}")
+	@DeleteMapping("/{id}")
 	public ResponseEntity<String> deleteUser(@PathVariable Long id) {
 		return ResponseEntity.ok(service.deleteUser(id));
 	}

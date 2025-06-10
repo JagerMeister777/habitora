@@ -5,15 +5,13 @@ import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class CreatePostDto {
+public class PostRequestDto {
 	
-	private Long userId;
 	private String text;
 	private Integer feelingScore;
 	private List<String> emotionKeywords;
 	
-	public CreatePostDto(Long userId, String text, Integer feelingScore, List<String> emotionKeywords) {
-		this.userId = userId;
+	public PostRequestDto(String text, Integer feelingScore, List<String> emotionKeywords) {
 		this.text = text;
 		this.feelingScore = feelingScore;
 		this.emotionKeywords = emotionKeywords;

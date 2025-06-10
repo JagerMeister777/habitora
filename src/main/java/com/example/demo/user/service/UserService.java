@@ -25,8 +25,13 @@ public class UserService {
 		this.encoder = encoder;
 	}
 	
+	public User findByUser(Long id) {
+		return repository.findById(id).orElseThrow(
+				() -> new UserNotFoundException("ユーザーが見つかり見つかりませんでした。"));
+	}
+	
 	public User getUser(Long id) {
-		User user =  repository.findById(id).orElseThrow(() -> new UserNotFoundException("ユーザーが見つかり見つかりませんでした。"));
+		User user = findByUser(id);
 		if (user.getIsDeleted()) {
 			throw new UserIsDeletedException("ユーザーが削除されています。");
 		} else {
@@ -54,7 +59,7 @@ public class UserService {
 			updateUser.setName(dto.getName());
 			updateUser.setEmail(dto.getEmail());
 			updateUser.setNickname(dto.getNickname());
-			updateUser.setPassword(dto.getPassword());
+			updateUser.setPassword(encoder.hash(dto.getPassword()));
 			repository.save(updateUser);
 			return updateUser.getName() + " の情報を更新しました。";
 	}

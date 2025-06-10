@@ -26,7 +26,8 @@ public class Post extends BaseEntity {
 	public Post() {}
 	
 	// TODO userIdを追加
-	public Post(String text, Integer feelingScore, String mode, List<String> emotionKeywords, Boolean isVisible, LocalDateTime createdAt) {
+	public Post(Long userId, String text, Integer feelingScore, String mode, List<String> emotionKeywords, Boolean isVisible, LocalDateTime createdAt) {
+		this.userId  = userId;
 		this.text = text;
 		this.feelingScore = feelingScore;
 		this.mode = mode;
