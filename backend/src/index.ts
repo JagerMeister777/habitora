@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import authRouter from './routes/auth';
@@ -13,7 +14,7 @@ import { errorHandler } from './middleware/errorHandler';
 const app = express();
 const PORT = process.env.PORT ?? 8080;
 
-app.use(cors({ origin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173' }));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 app.use('/api', authRouter);
@@ -26,6 +27,13 @@ app.use('/api', avatarRouter);
 
 app.use(errorHandler);
 
+// フロントエンドの静的ファイルを配信
+const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+app.use(express.static(frontendDist));
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(frontendDist, 'index.html'));
+});
+
 app.listen(PORT, () => {
-  console.log(`Habitora backend running on http://localhost:${PORT}`);
+  console.log(`Habitora running on http://localhost:${PORT}`);
 });
