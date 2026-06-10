@@ -4,13 +4,17 @@ import { resolveMode } from '../utils/mode';
 
 const prisma = new PrismaClient();
 
+const parseKeywords = (raw: string): string[] => {
+  try { return JSON.parse(raw) as string[]; } catch { return []; }
+};
+
 const toResponse = (post: {
   id: number;
   userId: number;
   text: string;
   feelingScore: number;
   mode: string;
-  emotionKeywords: unknown;
+  emotionKeywords: string;
   isVisible: boolean;
   createdAt: Date;
 }): PostResponse => ({
@@ -19,7 +23,7 @@ const toResponse = (post: {
   text: post.text,
   feelingScore: post.feelingScore,
   mode: post.mode as PostResponse['mode'],
-  emotionKeywords: (post.emotionKeywords as string[]) ?? [],
+  emotionKeywords: parseKeywords(post.emotionKeywords),
   isVisible: post.isVisible,
   createdAt: post.createdAt,
 });
@@ -43,7 +47,7 @@ export const createPost = async (data: {
       text: data.text,
       feelingScore: data.feelingScore,
       mode: resolveMode(data.feelingScore),
-      emotionKeywords: data.emotionKeywords ?? [],
+      emotionKeywords: JSON.stringify(data.emotionKeywords ?? []),
       isVisible: false,
     },
   });
@@ -72,13 +76,17 @@ export const updatePost = async (
   const existing = await prisma.post.findUnique({ where: { id } });
   if (!existing) throw new AppError(404, '投稿が見つかりませんでした。');
 
+  const keywords = data.emotionKeywords !== undefined
+    ? JSON.stringify(data.emotionKeywords)
+    : existing.emotionKeywords;
+
   const post = await prisma.post.update({
     where: { id },
     data: {
       text: data.text,
       feelingScore: data.feelingScore,
       mode: resolveMode(data.feelingScore),
-      emotionKeywords: (data.emotionKeywords ?? existing.emotionKeywords) as string[],
+      emotionKeywords: keywords,
       ...(data.isVisible !== undefined && { isVisible: data.isVisible }),
     },
   });

@@ -27,3 +27,4 @@ Thumbs.db
 *.iml
 *.ipr
 .gradle/
+backend/prisma/dev.db

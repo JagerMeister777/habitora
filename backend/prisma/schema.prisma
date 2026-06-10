@@ -2,8 +2,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// 本番MySQL切替時: provider を "mysql" に変更し DATABASE_URL を更新
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -24,18 +25,12 @@ model Post {
   id              Int      @id @default(autoincrement())
   userId          Int
   user            User     @relation(fields: [userId], references: [id])
-  text            String   @db.Text
+  text            String
   feelingScore    Int
-  mode            Mode
-  emotionKeywords Json
+  mode            String
+  emotionKeywords String   @default("[]")
   isVisible       Boolean  @default(false)
   createdAt       DateTime @default(now())
 
   @@map("post")
-}
-
-enum Mode {
-  LOW
-  NEUTRAL
-  HIGH
 }
