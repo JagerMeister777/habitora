@@ -78,7 +78,7 @@ export const updatePost = async (
       text: data.text,
       feelingScore: data.feelingScore,
       mode: resolveMode(data.feelingScore),
-      emotionKeywords: data.emotionKeywords ?? existing.emotionKeywords,
+      emotionKeywords: (data.emotionKeywords ?? existing.emotionKeywords) as string[],
       ...(data.isVisible !== undefined && { isVisible: data.isVisible }),
     },
   });
