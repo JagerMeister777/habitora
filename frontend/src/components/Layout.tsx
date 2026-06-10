@@ -18,7 +18,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         <nav style={styles.nav}>
           {user ? (
             <>
-              <span style={styles.userName}>{user.nickname ?? user.name}</span>
+              <span style={styles.userName}>{user.nickname ?? user.email.split('@')[0]}</span>
               <button onClick={handleLogout} style={styles.logoutBtn}>ログアウト</button>
             </>
           ) : (

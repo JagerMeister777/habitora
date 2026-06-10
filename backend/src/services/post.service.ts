@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { AppError, PostResponse } from '../types';
-import { resolveMode } from '../utils/mode';
+import { AppError, PostResponse, WeatherMood } from '../types';
+import { resolveMood } from '../utils/mood';
 
 const prisma = new PrismaClient();
 
@@ -13,7 +13,7 @@ const toResponse = (post: {
   userId: number;
   text: string;
   feelingScore: number;
-  mode: string;
+  mood: string;
   emotionKeywords: string;
   isVisible: boolean;
   createdAt: Date;
@@ -22,7 +22,7 @@ const toResponse = (post: {
   userId: post.userId,
   text: post.text,
   feelingScore: post.feelingScore,
-  mode: post.mode as PostResponse['mode'],
+  mood: post.mood as WeatherMood,
   emotionKeywords: parseKeywords(post.emotionKeywords),
   isVisible: post.isVisible,
   createdAt: post.createdAt,
@@ -33,6 +33,16 @@ const requireUser = async (userId: number): Promise<void> => {
   if (!user || user.isDeleted) throw new AppError(404, 'ユーザーが見つかりませんでした。');
 };
 
+const buildEmotionVector = (feelingScore: number): string => {
+  const normalized = feelingScore / 100;
+  const joy = Math.max(0, normalized - 0.3);
+  const sadness = Math.max(0, 0.7 - normalized);
+  const anger = feelingScore <= 10 ? 0.8 : 0;
+  const anxiety = feelingScore >= 51 && feelingScore <= 60 ? 0.6 : 0;
+  const hope = normalized >= 0.6 ? normalized - 0.5 : 0;
+  return JSON.stringify({ joy, sadness, anger, anxiety, hope });
+};
+
 export const createPost = async (data: {
   userId: number;
   text: string;
@@ -41,16 +51,49 @@ export const createPost = async (data: {
 }): Promise<PostResponse> => {
   await requireUser(data.userId);
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const existing = await prisma.post.findFirst({
+    where: {
+      userId: data.userId,
+      createdAt: { gte: today, lt: tomorrow },
+    },
+  });
+  if (existing) throw new AppError(409, '今日はすでに投稿しています。1日1投稿までです。');
+
+  const mood = resolveMood(data.feelingScore);
+
   const post = await prisma.post.create({
     data: {
       userId: data.userId,
       text: data.text,
       feelingScore: data.feelingScore,
-      mode: resolveMode(data.feelingScore),
+      mood,
       emotionKeywords: JSON.stringify(data.emotionKeywords ?? []),
       isVisible: false,
     },
   });
+
+  await prisma.feelingAnalysis.create({
+    data: {
+      postId: post.id,
+      emotionScore: data.feelingScore,
+      emotionVectorJson: buildEmotionVector(data.feelingScore),
+      mood,
+      reasonText: null,
+      suggestedWords: JSON.stringify([]),
+    },
+  });
+
+  await prisma.avatar.upsert({
+    where: { userId: data.userId },
+    create: { userId: data.userId, mood, fixedType: null },
+    update: { mood, updatedAt: new Date() },
+  });
+
   return toResponse(post);
 };
 
@@ -80,12 +123,14 @@ export const updatePost = async (
     ? JSON.stringify(data.emotionKeywords)
     : existing.emotionKeywords;
 
+  const mood = resolveMood(data.feelingScore);
+
   const post = await prisma.post.update({
     where: { id },
     data: {
       text: data.text,
       feelingScore: data.feelingScore,
-      mode: resolveMode(data.feelingScore),
+      mood,
       emotionKeywords: keywords,
       ...(data.isVisible !== undefined && { isVisible: data.isVisible }),
     },

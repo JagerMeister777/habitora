@@ -8,7 +8,7 @@ import { ApiError } from '../api/client';
 export const RegisterPage = () => {
   const { setUser } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPass: '', nickname: '' });
+  const [form, setForm] = useState({ email: '', password: '', confirmPass: '', nickname: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +27,7 @@ export const RegisterPage = () => {
       await register(form);
       const user = await login(form.email, form.password);
       setUser(user);
-      navigate('/');
+      navigate('/onboarding');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : '登録に失敗しました。');
     } finally {
@@ -43,7 +43,6 @@ export const RegisterPage = () => {
         {error && <div style={styles.error}>{error}</div>}
         <form onSubmit={handleSubmit}>
           {([
-            { field: 'name', label: '名前', type: 'text', placeholder: '山田 太郎' },
             { field: 'email', label: 'メールアドレス', type: 'email', placeholder: 'example@email.com' },
             { field: 'nickname', label: 'ニックネーム（任意）', type: 'text', placeholder: 'たろう' },
             { field: 'password', label: 'パスワード（8文字以上）', type: 'password', placeholder: '••••••••' },

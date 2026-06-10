@@ -5,7 +5,6 @@ import * as userService from '../services/user.service';
 const router = Router();
 
 const userSchema = z.object({
-  name: z.string().min(1, '名前を入力してください。'),
   email: z.string().email('有効なメールアドレスを入力してください。'),
   password: z.string().min(8, 'パスワードは8文字以上で入力してください。'),
   confirmPass: z.string(),
@@ -15,7 +14,11 @@ const userSchema = z.object({
   path: ['confirmPass'],
 });
 
-const updateSchema = userSchema;
+const updateSchema = z.object({
+  email: z.string().email('有効なメールアドレスを入力してください。'),
+  password: z.string().min(8).optional(),
+  nickname: z.string().optional(),
+});
 
 router.get('/users/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -30,7 +33,7 @@ router.post('/users', async (req: Request, res: Response, next: NextFunction) =>
   try {
     const data = userSchema.parse(req.body);
     const user = await userService.createUser(data);
-    res.status(201).json({ message: `${user.name}の登録が完了しました。`, user });
+    res.status(201).json({ message: '登録が完了しました。', user });
   } catch (err) {
     next(err);
   }

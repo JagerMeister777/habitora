@@ -3,22 +3,49 @@ import { useNavigate } from 'react-router-dom';
 import { createPost } from '../api/posts';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
+import type { WeatherMood } from '../types';
 
-const modeLabel = (score: number) => {
-  if (score <= 3) return '😔 落ち込み (LOW)';
-  if (score <= 6) return '😐 普通 (NEUTRAL)';
-  return '😊 良好 (HIGH)';
+const resolveMood = (score: number): WeatherMood => {
+  if (score <= 10) return 'STORM';
+  if (score <= 20) return 'RAIN';
+  if (score <= 30) return 'SNOW';
+  if (score <= 40) return 'FOG';
+  if (score <= 50) return 'CLOUDY';
+  if (score <= 60) return 'WHIRLWIND';
+  if (score <= 70) return 'SPROUT';
+  if (score <= 80) return 'RAINBOW';
+  if (score <= 90) return 'STAR';
+  return 'SUNNY';
 };
+
+const moodInfo: Record<WeatherMood, { icon: string; label: string; desc: string; color: string }> = {
+  STORM:     { icon: '⛈️',  label: '嵐',       desc: '怒り・動揺を感じています',     color: '#b71c1c' },
+  RAIN:      { icon: '🌧️', label: '雨',       desc: '悲しい・寂しい気持ちです',     color: '#1565c0' },
+  SNOW:      { icon: '❄️',  label: '雪',       desc: '静かな寂しさがあります',       color: '#37474f' },
+  FOG:       { icon: '🌫️', label: '霧',       desc: '混乱・疲れを感じています',     color: '#424242' },
+  CLOUDY:    { icon: '⛅',  label: 'くもり',   desc: 'ぼんやり・静かな気持ちです',   color: '#5d4037' },
+  WHIRLWIND: { icon: '🌪️', label: 'つむじ風', desc: '少し焦りを感じています',       color: '#e65100' },
+  SPROUT:    { icon: '🌻',  label: '芽吹き',   desc: '小さな前向きさがあります',     color: '#33691e' },
+  RAINBOW:   { icon: '🌈',  label: '虹',       desc: '癒し・希望を感じています',     color: '#880e4f' },
+  STAR:      { icon: '🌟',  label: '星空',     desc: '穏やかに思索しています',       color: '#283593' },
+  SUNNY:     { icon: '☀️',  label: '晴れ',     desc: '安心・前向きな気持ちです',     color: '#1b5e20' },
+};
+
+const MAX_CHARS = 250;
 
 export const CreatePostPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [text, setText] = useState('');
-  const [feelingScore, setFeelingScore] = useState(5);
+  const [feelingScore, setFeelingScore] = useState(55);
   const [keywordInput, setKeywordInput] = useState('');
   const [keywords, setKeywords] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const mood = resolveMood(feelingScore);
+  const info = moodInfo[mood];
+  const charsLeft = MAX_CHARS - text.length;
 
   const addKeyword = () => {
     const kw = keywordInput.trim();
@@ -31,6 +58,10 @@ export const CreatePostPage = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (text.length > MAX_CHARS) {
+      setError(`本文は${MAX_CHARS}文字以内で入力してください。`);
+      return;
+    }
     setError('');
     setLoading(true);
     try {
@@ -49,32 +80,44 @@ export const CreatePostPage = () => {
       <div style={styles.card}>
         {error && <div style={styles.error}>{error}</div>}
         <form onSubmit={handleSubmit}>
-          <label style={styles.label}>今の気持ち（テキスト）</label>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            required
-            style={styles.textarea}
-            placeholder="今日どんな気持ちでしたか？"
-            rows={4}
-          />
+          <label style={styles.label}>今の気持ち（最大250文字）</label>
+          <div style={{ position: 'relative' }}>
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              required
+              maxLength={MAX_CHARS}
+              style={styles.textarea}
+              placeholder="今日どんな気持ちでしたか？"
+              rows={4}
+            />
+            <span style={{ ...styles.charCount, color: charsLeft < 20 ? '#c62828' : '#aaa' }}>
+              {charsLeft}
+            </span>
+          </div>
 
           <label style={styles.label}>
-            気分スコア: <strong>{feelingScore}/10</strong>
-            &nbsp;&nbsp;
-            <span style={styles.modeLabel}>{modeLabel(feelingScore)}</span>
+            今日の気分スコア: <strong>{feelingScore}/100</strong>
           </label>
           <input
             type="range"
-            min={1}
-            max={10}
+            min={0}
+            max={100}
             value={feelingScore}
             onChange={(e) => setFeelingScore(Number(e.target.value))}
             style={styles.slider}
           />
           <div style={styles.sliderLabels}>
-            <span>1 (つらい)</span>
-            <span>10 (最高)</span>
+            <span>0 (つらい)</span>
+            <span>100 (最高)</span>
+          </div>
+
+          <div style={{ ...styles.moodPreview, borderColor: info.color }}>
+            <span style={styles.moodIcon}>{info.icon}</span>
+            <div>
+              <div style={{ fontWeight: 700, color: info.color }}>{info.label}</div>
+              <div style={{ fontSize: '0.82rem', color: '#666' }}>{info.desc}</div>
+            </div>
           </div>
 
           <label style={styles.label}>感情タグ</label>
@@ -118,10 +161,16 @@ const styles: Record<string, React.CSSProperties> = {
   card: { background: '#fff', borderRadius: '12px', padding: '2rem', boxShadow: '0 2px 12px rgba(0,0,0,0.07)' },
   error: { background: '#fff0f0', border: '1px solid #f5c2c7', borderRadius: '6px', padding: '0.6rem 1rem', color: '#842029', marginBottom: '1rem', fontSize: '0.9rem' },
   label: { display: 'block', fontSize: '0.9rem', color: '#555', marginBottom: '0.4rem', marginTop: '1.2rem' },
-  modeLabel: { fontSize: '0.85rem', color: '#2d7a4f', fontWeight: 600 },
   textarea: { width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.95rem', resize: 'vertical', boxSizing: 'border-box' },
+  charCount: { position: 'absolute', bottom: '8px', right: '10px', fontSize: '0.75rem' },
   slider: { width: '100%', accentColor: '#2d7a4f', marginTop: '0.25rem' },
   sliderLabels: { display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#999', marginBottom: '0.5rem' },
+  moodPreview: {
+    display: 'flex', alignItems: 'center', gap: '1rem',
+    padding: '0.75rem 1rem', borderRadius: '8px', border: '2px solid',
+    background: '#fafafa', marginTop: '0.75rem',
+  },
+  moodIcon: { fontSize: '2rem' },
   tagRow: { display: 'flex', gap: '0.5rem' },
   tagInput: { flex: 1, padding: '0.5rem 0.75rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.9rem' },
   addBtn: { padding: '0.5rem 1rem', background: '#e8f5e9', color: '#2d7a4f', border: '1px solid #a3d9a5', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem' },

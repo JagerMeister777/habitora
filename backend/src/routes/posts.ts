@@ -6,14 +6,14 @@ const router = Router();
 
 const createSchema = z.object({
   userId: z.number().int().positive('ユーザーIDを入力してください。'),
-  text: z.string().min(1, '本文を入力してください。'),
-  feelingScore: z.number().int().min(1).max(10, '感情スコアは1〜10で入力してください。'),
+  text: z.string().min(1, '本文を入力してください。').max(250, '本文は250文字以内で入力してください。'),
+  feelingScore: z.number().int().min(0).max(100, '感情スコアは0〜100で入力してください。'),
   emotionKeywords: z.array(z.string()).optional(),
 });
 
 const updateSchema = z.object({
-  text: z.string().min(1, '本文を入力してください。'),
-  feelingScore: z.number().int().min(1).max(10),
+  text: z.string().min(1, '本文を入力してください。').max(250, '本文は250文字以内で入力してください。'),
+  feelingScore: z.number().int().min(0).max(100),
   emotionKeywords: z.array(z.string()).optional(),
   isVisible: z.boolean().optional(),
 });

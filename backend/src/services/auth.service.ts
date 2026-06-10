@@ -17,9 +17,11 @@ export const login = async (email: string, password: string): Promise<UserRespon
 
   return {
     id: user.id,
-    name: user.name,
     email: user.email,
     nickname: user.nickname,
+    mbtiType: user.mbtiType,
+    level: user.level,
+    kindnessTotal: user.kindnessTotal,
     registeredAt: user.registeredAt,
   };
 };

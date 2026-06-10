@@ -6,15 +6,19 @@ const prisma = new PrismaClient();
 
 const toResponse = (user: {
   id: number;
-  name: string;
   email: string;
   nickname: string | null;
+  mbtiType: string | null;
+  level: number;
+  kindnessTotal: number;
   registeredAt: Date;
 }): UserResponse => ({
   id: user.id,
-  name: user.name,
   email: user.email,
   nickname: user.nickname,
+  mbtiType: user.mbtiType,
+  level: user.level,
+  kindnessTotal: user.kindnessTotal,
   registeredAt: user.registeredAt,
 });
 
@@ -26,7 +30,6 @@ export const getUser = async (id: number): Promise<UserResponse> => {
 };
 
 export const createUser = async (data: {
-  name: string;
   email: string;
   password: string;
   nickname?: string;
@@ -36,7 +39,6 @@ export const createUser = async (data: {
 
   const user = await prisma.user.create({
     data: {
-      name: data.name,
       email: data.email,
       password: await hash(data.password),
       nickname: data.nickname,
@@ -47,7 +49,7 @@ export const createUser = async (data: {
 
 export const updateUser = async (
   id: number,
-  data: { name: string; email: string; password: string; nickname?: string },
+  data: { email: string; password?: string; nickname?: string },
 ): Promise<UserResponse> => {
   const current = await prisma.user.findUnique({ where: { id } });
   if (!current || current.isDeleted) throw new AppError(404, 'ユーザーが見つかりませんでした。');
@@ -60,9 +62,8 @@ export const updateUser = async (
   const user = await prisma.user.update({
     where: { id },
     data: {
-      name: data.name,
       email: data.email,
-      password: await hash(data.password),
+      ...(data.password ? { password: await hash(data.password) } : {}),
       nickname: data.nickname,
     },
   });
