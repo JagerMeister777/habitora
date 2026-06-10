@@ -9,10 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
-public class CreatePostDto {
-
-    @NotNull
-    private Long userId;
+public class UpdatePostDto {
 
     @NotBlank
     private String text;
@@ -24,10 +21,12 @@ public class CreatePostDto {
 
     private List<String> emotionKeywords;
 
-    public CreatePostDto(Long userId, String text, Integer feelingScore, List<String> emotionKeywords) {
-        this.userId = userId;
+    private Boolean isVisible;
+
+    public UpdatePostDto(String text, Integer feelingScore, List<String> emotionKeywords, Boolean isVisible) {
         this.text = text;
         this.feelingScore = feelingScore;
         this.emotionKeywords = emotionKeywords;
+        this.isVisible = isVisible;
     }
 }
