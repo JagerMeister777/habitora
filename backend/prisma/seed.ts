@@ -150,6 +150,19 @@ const FORECAST_COMMENTS: Record<string, string> = {
   STORM: 'この嵐も、必ず過ぎ去ります。無理しないでください。',
 };
 
+const FORECAST_SUMMARIES: Record<string, string> = {
+  SUNNY: 'この頃は気持ちが明るく開けていたようです。そんな日が続いていること、すてきですね。',
+  RAINBOW: '困難の後に光を見つけた日が多かったようです。あなたの中に、回復する力があります。',
+  STAR: '静かに自分と向き合う時間が多かったようです。その深さは、あなたの大切な部分です。',
+  SPROUT: '少しずつ、でも着実に前向きな気持ちが芽吹いていたようです。',
+  CLOUDY: 'はっきりしないもやもやした日が多かったようです。それも、ありのままの自分です。',
+  WHIRLWIND: '心が揺れ動いた日が多かったようです。少しゆっくり休んでみませんか。',
+  FOG: '方向を見失いそうな日が続いていたようです。霧はいつか晴れます。',
+  RAIN: '涙のような気持ちの日が多かったようです。自分をいたわってあげてください。',
+  SNOW: '静けさの中で、静かに耐えていたようです。その優しさが、あなたらしさです。',
+  STORM: '激しい感情と向き合う日が続いていたようです。嵐の後には、必ず空が開けます。',
+};
+
 const REVIEW_COMMENTS: Record<string, string> = {
   SUNNY: 'とても輝かしい月でしたね。その笑顔、大切にしてください。',
   RAINBOW: '乗り越えた証が虹になりました。あなたは強いです。',
@@ -325,7 +338,6 @@ async function main() {
 
   for (const { user, defs } of allUserDefs) {
     const mainMood = computeMainMood(defs);
-    const avgScore = Math.round(defs.reduce((s, p) => s + p.score, 0) / defs.length);
     const moodTrend: Record<string, string> = {};
     defs.slice(0, 7).forEach((p) => {
       const key = daysAgo(p.days).toISOString().split('T')[0];
@@ -338,7 +350,7 @@ async function main() {
         endDate: today,
         mainMood,
         moodTrendJson: JSON.stringify(moodTrend),
-        emotionSummary: `直近30日間（${defs.length}件）の平均スコアは${avgScore}点です。`,
+        emotionSummary: FORECAST_SUMMARIES[mainMood] ?? '',
         avatarComment: FORECAST_COMMENTS[mainMood] ?? '',
       },
     });

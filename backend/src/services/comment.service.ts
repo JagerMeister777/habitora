@@ -18,12 +18,15 @@ const containsBlockedKeyword = (text: string): string | null => {
   return null;
 };
 
-const toResponse = (c: {
-  id: number; postId: number; userId: number;
-  user: { nickname: string | null };
-  text: string; isHidden: boolean; createdAt: Date;
-  _count: { thanks: number };
-}): CommentResponse => ({
+const toResponse = (
+  c: {
+    id: number; postId: number; userId: number;
+    user: { nickname: string | null };
+    text: string; isHidden: boolean; createdAt: Date;
+    _count: { thanks: number };
+  },
+  isThankedByAuthor = false,
+): CommentResponse => ({
   id: c.id,
   postId: c.postId,
   userId: c.userId,
@@ -32,6 +35,7 @@ const toResponse = (c: {
   isHidden: c.isHidden,
   createdAt: c.createdAt,
   thankCount: c._count.thanks,
+  isThankedByAuthor,
 });
 
 export const createComment = async (
@@ -90,7 +94,11 @@ export const listComments = async (postId: number): Promise<CommentResponse[]> =
   const comments = await prisma.comment.findMany({
     where: { postId, isHidden: false },
     orderBy: { createdAt: 'asc' },
-    include: { user: { select: { nickname: true } }, _count: { select: { thanks: true } } },
+    include: {
+      user: { select: { nickname: true } },
+      _count: { select: { thanks: true } },
+      thanks: { where: { fromUserId: post.userId }, select: { id: true } },
+    },
   });
-  return comments.map(toResponse);
+  return comments.map((c) => toResponse(c, c.thanks.length > 0));
 };

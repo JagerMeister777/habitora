@@ -17,16 +17,16 @@ const AVATAR_COMMENTS: Record<string, string> = {
 };
 
 const EMOTION_SUMMARIES: Record<string, string> = {
-  SUNNY:     'とても前向きな気持ちが続いています。',
-  RAINBOW:   '希望と癒しを感じる日が多かったようです。',
-  STAR:      '静かに深く思索する時間が多かったようです。',
-  SPROUT:    '小さな前向きさが積み重なっています。',
-  CLOUDY:    'ぼんやりとした静かな気持ちが続いています。',
-  WHIRLWIND: '焦りや忙しさを感じることが多かったようです。',
-  FOG:       '混乱や疲れを感じることが多かったようです。',
-  RAIN:      '悲しみや寂しさを感じることが多かったようです。',
-  SNOW:      '静かな孤独感を感じることが多かったようです。',
-  STORM:     '怒りや動揺を感じることが多かったようです。',
+  SUNNY:     'この頃は気持ちが明るく開けていたようです。そんな日が続いていること、すてきですね。',
+  RAINBOW:   '困難の後に光を見つけた日が多かったようです。あなたの中に、回復する力があります。',
+  STAR:      '静かに自分と向き合う時間が多かったようです。その深さは、あなたの大切な部分です。',
+  SPROUT:    '少しずつ、でも着実に前向きな気持ちが芽吹いていたようです。',
+  CLOUDY:    'はっきりしないもやもやした日が多かったようです。それも、ありのままの自分です。',
+  WHIRLWIND: '心が揺れ動いた日が多かったようです。少しゆっくり休んでみませんか。',
+  FOG:       '方向を見失いそうな日が続いていたようです。霧はいつか晴れます。',
+  RAIN:      '涙のような気持ちの日が多かったようです。自分をいたわってあげてください。',
+  SNOW:      '静けさの中で、静かに耐えていたようです。その優しさが、あなたらしさです。',
+  STORM:     '激しい感情と向き合う日が続いていたようです。嵐の後には、必ず空が開けます。',
 };
 
 const toResponse = (f: {
@@ -75,10 +75,7 @@ export const getOrGenerateForecast = async (userId: number): Promise<MoodForecas
     moodTrend[dateKey] = p.mood;
   });
 
-  const avgScore = Math.round(posts.reduce((s, p) => s + p.feelingScore, 0) / posts.length);
-  const emotionSummary =
-    `直近30日間（${posts.length}件）の平均スコアは${avgScore}点です。` +
-    (EMOTION_SUMMARIES[mainMood] ?? '');
+  const emotionSummary = EMOTION_SUMMARIES[mainMood] ?? '';
 
   const forecast = await prisma.moodForecast.create({
     data: {
@@ -121,10 +118,7 @@ export const regenerateForecast = async (userId: number): Promise<MoodForecastRe
     moodTrend[dateKey] = p.mood;
   });
 
-  const avgScore = Math.round(posts.reduce((s, p) => s + p.feelingScore, 0) / posts.length);
-  const emotionSummary =
-    `直近30日間（${posts.length}件）の平均スコアは${avgScore}点です。` +
-    (EMOTION_SUMMARIES[mainMood] ?? '');
+  const emotionSummary = EMOTION_SUMMARIES[mainMood] ?? '';
 
   const forecast = await prisma.moodForecast.create({
     data: {

@@ -19,7 +19,20 @@ export interface User {
   kindnessTotal: number;
   penaltyCount: number;
   isRestricted: boolean;
+  reDiagnosisNeeded: boolean;
   registeredAt: string;
+}
+
+export interface Avatar {
+  id: number;
+  userId: number;
+  fixedType: string | null;
+  level: number;
+  mood: string;
+  expression: string;
+  itemsJson: string;
+  commentStyle: string;
+  updatedAt: string;
 }
 
 export interface Post {
@@ -42,6 +55,7 @@ export interface Comment {
   isHidden: boolean;
   createdAt: string;
   thankCount: number;
+  isThankedByAuthor: boolean;
 }
 
 export interface Thank {

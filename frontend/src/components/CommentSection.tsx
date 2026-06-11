@@ -52,12 +52,14 @@ export const CommentSection = ({ postId, postAuthorId }: Props) => {
       await sendThank(commentId, user.id);
       setThankedIds((prev) => new Set(prev).add(commentId));
       setComments((prev) =>
-        prev.map((c) => c.id === commentId ? { ...c, thankCount: c.thankCount + 1 } : c),
+        prev.map((c) => c.id === commentId ? { ...c, thankCount: c.thankCount + 1, isThankedByAuthor: true } : c),
       );
     } catch { /* 重複など無視 */ }
   };
 
   const commentCount = comments.length;
+  const authorThanksUsed = comments.filter((c) => c.isThankedByAuthor || thankedIds.has(c.id)).length;
+  const thankLimitReached = authorThanksUsed >= 5;
 
   return (
     <div style={styles.wrap}>
@@ -84,11 +86,12 @@ export const CommentSection = ({ postId, postAuthorId }: Props) => {
                 {user && user.id === postAuthorId && user.id !== c.userId && (
                   <button
                     onClick={() => handleThank(c.id)}
-                    disabled={thankedIds.has(c.id)}
-                    style={{ ...styles.thankBtn, opacity: thankedIds.has(c.id) ? 0.5 : 1 }}
+                    disabled={c.isThankedByAuthor || thankedIds.has(c.id) || thankLimitReached}
+                    style={{ ...styles.thankBtn, opacity: (c.isThankedByAuthor || thankedIds.has(c.id) || thankLimitReached) ? 0.5 : 1 }}
+                    title={thankLimitReached && !c.isThankedByAuthor && !thankedIds.has(c.id) ? 'この投稿のありがとうは5件までです' : undefined}
                   >
                     <FiHeart size={12} style={{ verticalAlign: 'middle', marginRight: 3 }} />
-                    {thankedIds.has(c.id) ? '送った' : 'ありがとう'}
+                    {c.isThankedByAuthor || thankedIds.has(c.id) ? '送った' : 'ありがとう'}
                     {c.thankCount > 0 && <span style={styles.thankCount}> {c.thankCount}</span>}
                   </button>
                 )}
@@ -99,6 +102,10 @@ export const CommentSection = ({ postId, postAuthorId }: Props) => {
               <p style={styles.commentText}>{c.text}</p>
             </div>
           ))}
+
+          {user && user.id === postAuthorId && thankLimitReached && (
+            <p style={styles.thankLimitNote}>この投稿へのありがとうは5件送りました。</p>
+          )}
 
           {user && (
             user.isRestricted ? (
@@ -145,4 +152,5 @@ const styles: Record<string, React.CSSProperties> = {
   error: { color: '#c00', fontSize: '0.82rem', margin: 0 },
   submitBtn: { alignSelf: 'flex-end', padding: '0.4rem 1.2rem', background: '#2d7a4f', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.88rem', fontWeight: 600, cursor: 'pointer' },
   restricted: { fontSize: '0.82rem', color: '#c00', background: '#fff5f5', borderRadius: '6px', padding: '0.5rem 0.75rem', border: '1px solid #fca5a5' },
+  thankLimitNote: { fontSize: '0.78rem', color: '#e09000', margin: '0.25rem 0', textAlign: 'right' as const },
 };

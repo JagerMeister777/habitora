@@ -41,6 +41,11 @@ export const createThank = async (
   const already = await prisma.thank.findUnique({ where: { commentId_fromUserId: { commentId, fromUserId } } });
   if (already) throw new AppError(409, 'すでにありがとうを送っています。');
 
+  const thanksOnPostCount = await prisma.thank.count({
+    where: { fromUserId, comment: { postId: comment.postId } },
+  });
+  if (thanksOnPostCount >= 5) throw new AppError(400, '1つの投稿に対してありがとうは最大5件までです。');
+
   const sender = await prisma.user.findUnique({ where: { id: fromUserId } });
 
   const thank = await prisma.thank.create({

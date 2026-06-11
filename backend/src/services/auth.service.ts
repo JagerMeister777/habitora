@@ -24,6 +24,7 @@ export const login = async (email: string, password: string): Promise<UserRespon
     kindnessTotal: user.kindnessTotal,
     penaltyCount: user.penaltyCount,
     isRestricted: user.isRestricted,
+    reDiagnosisNeeded: user.reDiagnosisNeeded,
     registeredAt: user.registeredAt,
   };
 };

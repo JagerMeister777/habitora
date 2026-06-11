@@ -7,6 +7,14 @@ import { moodConfig } from '../utils/moodConfig';
 import type { WeatherMood } from '../types';
 import { FiBookOpen, FiStar, FiMessageCircle } from 'react-icons/fi';
 
+const scoreToQualitative = (avg: number): string => {
+  if (avg >= 90) return 'とても晴れやかな気持ちの月でした。';
+  if (avg >= 70) return '穏やかで前向きな気持ちが続いた月でした。';
+  if (avg >= 50) return '穏やかな日と揺れる日が混ざり合った月でした。';
+  if (avg >= 30) return '少し重さや揺れを感じる日が多かった月でした。';
+  return '心が重く感じることが多い月でした。自分をいたわってあげてください。';
+};
+
 export const ReviewPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -87,7 +95,7 @@ export const ReviewPage = () => {
                 </div>
                 {r.summaryText && <p style={styles.summary}>{r.summaryText}</p>}
                 {h && (
-                  <p style={styles.score}>平均スコア: <strong>{h.avg}点</strong></p>
+                  <p style={styles.score}>{scoreToQualitative(h.avg)}</p>
                 )}
                 {r.avatarComment && (
                   <p style={styles.avatarComment}><FiMessageCircle size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {r.avatarComment}</p>

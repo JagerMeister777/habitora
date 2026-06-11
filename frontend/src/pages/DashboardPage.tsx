@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getPostsByUser, deletePost } from '../api/posts';
+import { getAvatar } from '../api/avatar';
 import { useAuth } from '../context/AuthContext';
 import { PostCard } from '../components/PostCard';
-import type { Post, WeatherMood } from '../types';
+import { AvatarCard } from '../components/AvatarCard';
+import type { Post, Avatar, WeatherMood } from '../types';
 import { moodConfig } from '../utils/moodConfig';
-import { FiStar } from 'react-icons/fi';
+import { FiStar, FiRefreshCw } from 'react-icons/fi';
 
 const MBTI_NAMES: Record<string, string> = {
   INFP: '優しき理想家', INFJ: '静かな導き手', ISFP: '感性のアーティスト', ISFJ: '世話好きな癒し手',
@@ -14,10 +16,13 @@ const MBTI_NAMES: Record<string, string> = {
   ENTP: 'ひらめきの火花', ENTJ: 'ビジョンの指揮官', ESTP: 'アクションスター', ESTJ: '現実主義の管理者',
 };
 
+const DAYS_BEFORE_REMINDER = 7;
+
 export const DashboardPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [avatar, setAvatar] = useState<Avatar | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -26,9 +31,13 @@ export const DashboardPage = () => {
       navigate('/login');
       return;
     }
-    getPostsByUser(user.id)
-      .then(setPosts)
-      .catch(() => setError('投稿の取得に失敗しました。'))
+    Promise.all([
+      getPostsByUser(user.id),
+      getAvatar(user.id).catch(() => null),
+    ]).then(([userPosts, userAvatar]) => {
+      setPosts(userPosts);
+      setAvatar(userAvatar);
+    }).catch(() => setError('データの取得に失敗しました。'))
       .finally(() => setLoading(false));
   }, [user, navigate]);
 
@@ -45,6 +54,12 @@ export const DashboardPage = () => {
   if (!user) return null;
 
   const recentMoods = posts.slice(0, 7).map((p) => p.mood);
+
+  const showReminder = posts.length === 0 || (() => {
+    const lastPost = new Date(posts[0].createdAt);
+    const daysSince = (Date.now() - lastPost.getTime()) / (1000 * 60 * 60 * 24);
+    return daysSince >= DAYS_BEFORE_REMINDER;
+  })();
 
   return (
     <div>
@@ -68,6 +83,23 @@ export const DashboardPage = () => {
         </div>
         <Link to="/posts/new" style={styles.newBtn}>+ 今日の気持ちを記録</Link>
       </div>
+
+      {avatar && <AvatarCard avatar={avatar} />}
+
+      {showReminder && !loading && (
+        <div style={styles.reminderBanner}>
+          <span>そろそろ気持ちを記録してみませんか？</span>
+          <Link to="/posts/new" style={styles.reminderLink}>記録する →</Link>
+        </div>
+      )}
+
+      {user.reDiagnosisNeeded && user.mbtiType && (
+        <div style={styles.rediagBanner}>
+          <FiRefreshCw size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+          最近の記録を見ると、あなたの傾向が少し変わってきているかもしれません。
+          <Link to="/onboarding" style={styles.rediagLink}> 仮診断を更新してみる →</Link>
+        </div>
+      )}
 
       {recentMoods.length > 0 && (
         <div style={styles.weatherRow}>
@@ -122,4 +154,15 @@ const styles: Record<string, React.CSSProperties> = {
   errorText: { color: '#842029', background: '#fff0f0', padding: '0.6rem 1rem', borderRadius: '6px' },
   empty: { textAlign: 'center', padding: '3rem', color: '#888', background: '#fff', borderRadius: '12px' },
   emptyLink: { color: '#2d7a4f', textDecoration: 'none', fontWeight: 600 },
+  reminderBanner: {
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' as const,
+    background: '#f0fdf4', border: '1px solid #a3d9a5', borderRadius: '10px',
+    padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.9rem', color: '#2d7a4f', gap: '0.5rem',
+  },
+  reminderLink: { color: '#2d7a4f', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' as const },
+  rediagBanner: {
+    background: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '10px',
+    padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.88rem', color: '#92400e',
+  },
+  rediagLink: { color: '#d97706', fontWeight: 700, textDecoration: 'none' },
 };

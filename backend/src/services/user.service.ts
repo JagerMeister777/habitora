@@ -13,6 +13,7 @@ const toResponse = (user: {
   kindnessTotal: number;
   penaltyCount: number;
   isRestricted: boolean;
+  reDiagnosisNeeded: boolean;
   registeredAt: Date;
 }): UserResponse => ({
   id: user.id,
@@ -23,6 +24,7 @@ const toResponse = (user: {
   kindnessTotal: user.kindnessTotal,
   penaltyCount: user.penaltyCount,
   isRestricted: user.isRestricted,
+  reDiagnosisNeeded: user.reDiagnosisNeeded,
   registeredAt: user.registeredAt,
 });
 

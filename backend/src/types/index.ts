@@ -19,6 +19,7 @@ export interface UserResponse {
   kindnessTotal: number;
   penaltyCount: number;
   isRestricted: boolean;
+  reDiagnosisNeeded: boolean;
   registeredAt: Date;
 }
 
@@ -42,6 +43,7 @@ export interface CommentResponse {
   isHidden: boolean;
   createdAt: Date;
   thankCount: number;
+  isThankedByAuthor: boolean;
 }
 
 export interface ThankResponse {
