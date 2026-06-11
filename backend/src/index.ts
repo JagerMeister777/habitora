@@ -9,6 +9,9 @@ import mbtiRouter from './routes/mbti';
 import thanksRouter from './routes/thanks';
 import notificationsRouter from './routes/notifications';
 import avatarRouter from './routes/avatar';
+import reviewsRouter from './routes/reviews';
+import moodForecastRouter from './routes/mood-forecast';
+import consultationRouter from './routes/consultation';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -24,6 +27,9 @@ app.use('/api', mbtiRouter);
 app.use('/api', thanksRouter);
 app.use('/api', notificationsRouter);
 app.use('/api', avatarRouter);
+app.use('/api', reviewsRouter);
+app.use('/api', moodForecastRouter);
+app.use('/api', consultationRouter);
 
 app.use(errorHandler);
 

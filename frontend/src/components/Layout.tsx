@@ -1,10 +1,19 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { listNotifications } from '../api/notifications';
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    listNotifications(user.id)
+      .then((ns) => setUnreadCount(ns.filter((n) => !n.isRead).length))
+      .catch(() => { /* ignore */ });
+  }, [user]);
 
   const handleLogout = () => {
     setUser(null);
@@ -18,7 +27,16 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         <nav style={styles.nav}>
           {user ? (
             <>
-              <span style={styles.userName}>{user.nickname ?? user.email.split('@')[0]}</span>
+              <Link to="/forecast" style={styles.navLink}>⛅ 天気予報</Link>
+              <Link to="/reviews" style={styles.navLink}>📖 ふり返り</Link>
+              <Link to="/consultation" style={styles.navLink}>🪞 こころの鏡</Link>
+              <Link to="/notifications" style={styles.navLink}>
+                🔔
+                {unreadCount > 0 && <span style={styles.badge}>{unreadCount}</span>}
+              </Link>
+              <Link to="/profile" style={styles.navLink}>
+                {user.nickname ?? user.email.split('@')[0]}
+              </Link>
               <button onClick={handleLogout} style={styles.logoutBtn}>ログアウト</button>
             </>
           ) : (
@@ -50,9 +68,20 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#2d7a4f',
     textDecoration: 'none',
   },
-  nav: { display: 'flex', alignItems: 'center', gap: '1rem' },
-  navLink: { color: '#555', textDecoration: 'none', fontSize: '0.9rem' },
-  userName: { fontSize: '0.9rem', color: '#333' },
+  nav: { display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' },
+  navLink: { color: '#555', textDecoration: 'none', fontSize: '0.9rem', position: 'relative' as const },
+  badge: {
+    position: 'absolute' as const,
+    top: '-6px',
+    right: '-8px',
+    background: '#ef4444',
+    color: '#fff',
+    fontSize: '0.65rem',
+    fontWeight: 700,
+    borderRadius: '10px',
+    padding: '1px 5px',
+    lineHeight: 1.2,
+  },
   logoutBtn: {
     background: 'none',
     border: '1px solid #ccc',
