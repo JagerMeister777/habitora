@@ -40,6 +40,7 @@ export const CreatePostPage = () => {
   const [feelingScore, setFeelingScore] = useState(55);
   const [keywordInput, setKeywordInput] = useState('');
   const [keywords, setKeywords] = useState<string[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -65,7 +66,7 @@ export const CreatePostPage = () => {
     setError('');
     setLoading(true);
     try {
-      await createPost({ userId: user.id, text, feelingScore, emotionKeywords: keywords });
+      await createPost({ userId: user.id, text, feelingScore, emotionKeywords: keywords, isVisible });
       navigate('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : '投稿に失敗しました。');
@@ -147,6 +148,23 @@ export const CreatePostPage = () => {
             </div>
           )}
 
+          <label style={styles.visibleLabel}>
+            <div style={styles.toggleRow}>
+              <span>👥 みんなに公開する</span>
+              <div
+                role="switch"
+                aria-checked={isVisible}
+                onClick={() => setIsVisible((v) => !v)}
+                style={{ ...styles.toggle, background: isVisible ? '#2d7a4f' : '#ccc' }}
+              >
+                <div style={{ ...styles.toggleThumb, transform: isVisible ? 'translateX(20px)' : 'translateX(0)' }} />
+              </div>
+            </div>
+            <p style={styles.visibleNote}>
+              {isVisible ? 'タイムラインに表示されます。ありがとうをもらえるかも。' : '自分だけに表示されます。'}
+            </p>
+          </label>
+
           <button type="submit" disabled={loading} style={styles.submitBtn}>
             {loading ? '投稿中...' : '記録する'}
           </button>
@@ -177,5 +195,10 @@ const styles: Record<string, React.CSSProperties> = {
   tags: { display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.6rem' },
   tag: { display: 'flex', alignItems: 'center', gap: '0.25rem', background: '#e8f5e9', border: '1px solid #a3d9a5', borderRadius: '12px', padding: '2px 10px', fontSize: '0.82rem', color: '#2d7a4f' },
   removeTag: { background: 'none', border: 'none', cursor: 'pointer', color: '#999', fontSize: '0.85rem', padding: '0' },
+  visibleLabel: { display: 'block', marginTop: '1.2rem' },
+  toggleRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem', color: '#555' },
+  toggle: { width: '44px', height: '24px', borderRadius: '12px', cursor: 'pointer', position: 'relative' as const, transition: 'background 0.2s', flexShrink: 0 },
+  toggleThumb: { position: 'absolute' as const, top: '3px', left: '3px', width: '18px', height: '18px', background: '#fff', borderRadius: '50%', transition: 'transform 0.2s' },
+  visibleNote: { margin: '0.3rem 0 0', fontSize: '0.78rem', color: '#999' },
   submitBtn: { marginTop: '1.5rem', width: '100%', padding: '0.75rem', background: '#2d7a4f', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '1rem', cursor: 'pointer', fontWeight: 600 },
 };

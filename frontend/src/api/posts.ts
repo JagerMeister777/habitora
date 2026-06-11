@@ -6,8 +6,15 @@ export const createPost = (data: {
   text: string;
   feelingScore: number;
   emotionKeywords?: string[];
+  isVisible?: boolean;
 }): Promise<Post> =>
   request<Post>('/posts', { method: 'POST', body: JSON.stringify(data) });
+
+export const getTimeline = (limit = 20, cursor?: number): Promise<Post[]> => {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (cursor) params.set('cursor', String(cursor));
+  return request<Post[]>(`/posts/timeline?${params.toString()}`);
+};
 
 export const getPostsByUser = (userId: number): Promise<Post[]> =>
   request<Post[]>(`/users/${userId}/posts`);

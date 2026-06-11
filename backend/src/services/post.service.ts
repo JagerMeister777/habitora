@@ -48,6 +48,7 @@ export const createPost = async (data: {
   text: string;
   feelingScore: number;
   emotionKeywords?: string[];
+  isVisible?: boolean;
 }): Promise<PostResponse> => {
   await requireUser(data.userId);
 
@@ -73,7 +74,7 @@ export const createPost = async (data: {
       feelingScore: data.feelingScore,
       mood,
       emotionKeywords: JSON.stringify(data.emotionKeywords ?? []),
-      isVisible: false,
+      isVisible: data.isVisible ?? false,
     },
   });
 
@@ -136,6 +137,16 @@ export const updatePost = async (
     },
   });
   return toResponse(post);
+};
+
+export const getTimeline = async (limit = 20, cursor?: number): Promise<PostResponse[]> => {
+  const posts = await prisma.post.findMany({
+    where: { isVisible: true },
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+  });
+  return posts.map(toResponse);
 };
 
 export const deletePost = async (id: number): Promise<void> => {

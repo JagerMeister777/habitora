@@ -11,6 +11,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { MoodForecastPage } from './pages/MoodForecastPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { ConsultationPage } from './pages/ConsultationPage';
+import { TimelinePage } from './pages/TimelinePage';
 
 const App = () => (
   <AuthProvider>
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/forecast" element={<MoodForecastPage />} />
           <Route path="/reviews" element={<ReviewPage />} />
           <Route path="/consultation" element={<ConsultationPage />} />
+          <Route path="/timeline" element={<TimelinePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

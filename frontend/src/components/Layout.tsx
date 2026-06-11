@@ -27,6 +27,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
         <nav style={styles.nav}>
           {user ? (
             <>
+              <Link to="/timeline" style={styles.navLink}>👥 みんなの投稿</Link>
               <Link to="/forecast" style={styles.navLink}>⛅ 天気予報</Link>
               <Link to="/reviews" style={styles.navLink}>📖 ふり返り</Link>
               <Link to="/consultation" style={styles.navLink}>🪞 こころの鏡</Link>
