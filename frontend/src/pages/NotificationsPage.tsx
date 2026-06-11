@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { listNotifications, markNotificationRead } from '../api/notifications';
 import type { Notification } from '../types';
-import { FiHeart, FiCalendar, FiCloud, FiAward, FiBell } from 'react-icons/fi';
+import { FiHeart, FiCalendar, FiCloud, FiAward, FiBell, FiMessageCircle } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
 
 const typeIcon: Record<string, IconType> = {
@@ -11,7 +11,7 @@ const typeIcon: Record<string, IconType> = {
   REMINDER: FiCalendar,
   MOOD: FiCloud,
   ACHIEVEMENT: FiAward,
-  COMMENT: FiAward,
+  COMMENT: FiMessageCircle,
 };
 
 export const NotificationsPage = () => {
