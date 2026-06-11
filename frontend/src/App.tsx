@@ -6,6 +6,11 @@ import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { CreatePostPage } from './pages/CreatePostPage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import { NotificationsPage } from './pages/NotificationsPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { MoodForecastPage } from './pages/MoodForecastPage';
+import { ReviewPage } from './pages/ReviewPage';
+import { ConsultationPage } from './pages/ConsultationPage';
 
 const App = () => (
   <AuthProvider>
@@ -17,6 +22,11 @@ const App = () => (
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/posts/new" element={<CreatePostPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/forecast" element={<MoodForecastPage />} />
+          <Route path="/reviews" element={<ReviewPage />} />
+          <Route path="/consultation" element={<ConsultationPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

@@ -73,6 +73,45 @@ export interface AvatarResponse {
   updatedAt: Date;
 }
 
+export interface ReviewResponse {
+  id: number;
+  userId: number;
+  periodStart: Date;
+  periodEnd: Date;
+  summaryText: string | null;
+  selectedPostIdsJson: string;
+  highlightFeelingJson: string;
+  avatarComment: string | null;
+  levelChange: number;
+  reviewedAt: Date;
+}
+
+export interface MoodForecastResponse {
+  id: number;
+  userId: number;
+  startDate: Date;
+  endDate: Date;
+  mainMood: string;
+  moodTrendJson: string;
+  emotionSummary: string | null;
+  avatarComment: string | null;
+  forecastedAt: Date;
+}
+
+export interface ConsultationResponse {
+  id: number;
+  userId: number;
+  title: string | null;
+  content: string;
+  selectedTheme: string | null;
+  guidanceType: string | null;
+  guidanceStepsJson: string;
+  insightSummary: string | null;
+  avatarReaction: string | null;
+  isArchived: boolean;
+  submittedAt: Date;
+}
+
 export class AppError extends Error {
   constructor(
     public readonly statusCode: number,
