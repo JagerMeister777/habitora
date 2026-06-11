@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getMoodForecast, regenerateForecast } from '../api/moodForecast';
 import type { MoodForecast } from '../types';
 import { moodConfig } from '../utils/moodConfig';
+import { MoodBubble } from '../components/MoodBubble';
 import type { WeatherMood } from '../types';
 import { FiCloud, FiRefreshCw, FiMessageCircle } from 'react-icons/fi';
 
@@ -55,9 +56,9 @@ export const MoodForecastPage = () => {
     <div>
       <h2 style={styles.heading}><FiCloud size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} /> 気持ち天気予報</h2>
 
-      <div style={styles.mainCard}>
-        {(() => { const mc = moodConfig[forecast.mainMood as WeatherMood] ?? moodConfig.CLOUDY; const MI = mc.icon; return <div style={{ ...styles.bigIcon, color: mc.text }}><MI size={72} /></div>; })()}
-        <div style={styles.mainMoodLabel}>{(moodConfig[forecast.mainMood as WeatherMood] ?? moodConfig.CLOUDY).label}</div>
+      <div style={{ ...styles.mainCard, background: (moodConfig[forecast.mainMood as WeatherMood] ?? moodConfig.CLOUDY).color, borderColor: (moodConfig[forecast.mainMood as WeatherMood] ?? moodConfig.CLOUDY).border }}>
+        <div style={styles.bigIcon}><MoodBubble mood={forecast.mainMood} size={56} /></div>
+        <div style={{ ...styles.mainMoodLabel, color: (moodConfig[forecast.mainMood as WeatherMood] ?? moodConfig.CLOUDY).text }}>{(moodConfig[forecast.mainMood as WeatherMood] ?? moodConfig.CLOUDY).label}</div>
         {forecast.avatarComment && (
           <p style={styles.avatarComment}><FiMessageCircle size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {forecast.avatarComment}</p>
         )}
@@ -67,18 +68,14 @@ export const MoodForecastPage = () => {
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>直近7日間の天気</h3>
           <div style={styles.trendRow}>
-            {trendEntries.map(([date, mood]) => {
-              const mc = moodConfig[mood as WeatherMood] ?? moodConfig.CLOUDY;
-              const MI = mc.icon;
-              return (
-                <div key={date} style={styles.trendItem}>
-                  <span style={{ ...styles.trendIcon, color: mc.text }}><MI size={28} /></span>
-                  <span style={styles.trendDate}>
-                    {new Date(date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}
-                  </span>
-                </div>
-              );
-            })}
+            {trendEntries.map(([date, mood]) => (
+              <div key={date} style={styles.trendItem}>
+                <MoodBubble mood={mood} size={22} />
+                <span style={styles.trendDate}>
+                  {new Date(date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -105,9 +102,9 @@ const styles: Record<string, React.CSSProperties> = {
   heading: { marginBottom: '1.5rem', color: '#333' },
   center: { textAlign: 'center', marginTop: '3rem', color: '#666' },
   errorBox: { textAlign: 'center', padding: '3rem 1rem', background: '#fff', borderRadius: '12px', border: '1px solid #eee' },
-  mainCard: { textAlign: 'center', background: '#fff', border: '1px solid #eee', borderRadius: '16px', padding: '2.5rem 1rem', marginBottom: '1.5rem' },
-  bigIcon: { lineHeight: 1, display: 'flex', justifyContent: 'center' },
-  mainMoodLabel: { fontSize: '1.4rem', fontWeight: 700, color: '#333', marginTop: '0.5rem' },
+  mainCard: { textAlign: 'center', border: '1px solid', borderRadius: '16px', padding: '2.5rem 1rem', marginBottom: '1.5rem' },
+  bigIcon: { lineHeight: 1, display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' },
+  mainMoodLabel: { fontSize: '1.4rem', fontWeight: 700, marginTop: '0.25rem' },
   avatarComment: { marginTop: '1rem', color: '#555', fontSize: '0.95rem', lineHeight: 1.6, fontStyle: 'italic' },
   section: { background: '#fff', border: '1px solid #eee', borderRadius: '12px', padding: '1.2rem', marginBottom: '1rem' },
   sectionTitle: { margin: '0 0 1rem', fontSize: '0.95rem', color: '#555', fontWeight: 600 },

@@ -1,5 +1,6 @@
 import type { Avatar } from '../types';
 import { moodConfig } from '../utils/moodConfig';
+import { MoodBubble } from './MoodBubble';
 import type { WeatherMood } from '../types';
 
 const EXPRESSION_LABELS: Record<string, string> = {
@@ -33,15 +34,12 @@ interface Props {
 
 export const AvatarCard = ({ avatar }: Props) => {
   const mc = moodConfig[avatar.mood as WeatherMood] ?? moodConfig.CLOUDY;
-  const Icon = mc.icon;
   const expressionLabel = EXPRESSION_LABELS[avatar.expression] ?? avatar.expression;
   const styleLabel = COMMENT_STYLE_LABELS[avatar.commentStyle] ?? avatar.commentStyle;
 
   return (
     <div style={{ ...styles.card, background: mc.color, borderColor: mc.border }}>
-      <div style={{ ...styles.iconWrap, color: mc.text }}>
-        <Icon size={56} />
-      </div>
+      <MoodBubble mood={avatar.mood} size={40} />
       <div style={styles.info}>
         <div style={styles.levelBadge}>Lv.{avatar.level}</div>
         <div style={{ ...styles.moodLabel, color: mc.text }}>{mc.label}</div>
@@ -62,7 +60,6 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '1rem 1.25rem',
     marginBottom: '1.25rem',
   },
-  iconWrap: { flexShrink: 0, display: 'flex', alignItems: 'center' },
   info: { flex: 1 },
   levelBadge: {
     display: 'inline-block',

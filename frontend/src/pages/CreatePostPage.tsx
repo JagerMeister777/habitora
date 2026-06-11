@@ -5,7 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
 import type { WeatherMood } from '../types';
 import { moodConfig } from '../utils/moodConfig';
-import { FiGlobe } from 'react-icons/fi';
+import { MoodBubble } from '../components/MoodBubble';
+import { FiGlobe, FiPlus, FiX } from 'react-icons/fi';
 
 const resolveMood = (score: number): WeatherMood => {
   if (score <= 10) return 'STORM';
@@ -47,9 +48,7 @@ export const CreatePostPage = () => {
   const [loading, setLoading] = useState(false);
 
   const mood = resolveMood(feelingScore);
-  const info = moodConfig[mood];
   const desc = moodDesc[mood];
-  const MoodIcon = info.icon;
   const charsLeft = MAX_CHARS - text.length;
 
   const addKeyword = () => {
@@ -117,10 +116,10 @@ export const CreatePostPage = () => {
             <span>100 (最高)</span>
           </div>
 
-          <div style={{ ...styles.moodPreview, borderColor: info.text }}>
-            <span style={styles.moodIcon}><MoodIcon size={36} color={info.text} /></span>
+          <div style={styles.moodPreview}>
+            <MoodBubble mood={mood} size={28} />
             <div>
-              <div style={{ fontWeight: 700, color: info.text }}>{info.label}</div>
+              <div style={{ fontWeight: 700, color: moodConfig[mood].text }}>{moodConfig[mood].label}</div>
               <div style={{ fontSize: '0.82rem', color: '#666' }}>{desc}</div>
             </div>
           </div>
@@ -135,7 +134,9 @@ export const CreatePostPage = () => {
               style={styles.tagInput}
               placeholder="例: 嬉しい、疲れた"
             />
-            <button type="button" onClick={addKeyword} style={styles.addBtn}>追加</button>
+            <button type="button" onClick={addKeyword} style={styles.addBtn}>
+              <FiPlus size={14} style={{ verticalAlign: 'middle', marginRight: 3 }} />追加
+            </button>
           </div>
           {keywords.length > 0 && (
             <div style={styles.tags}>
@@ -146,7 +147,7 @@ export const CreatePostPage = () => {
                     type="button"
                     onClick={() => setKeywords((prev) => prev.filter((k) => k !== kw))}
                     style={styles.removeTag}
-                  >×</button>
+                  ><FiX size={12} /></button>
                 </span>
               ))}
             </div>
@@ -189,10 +190,9 @@ const styles: Record<string, React.CSSProperties> = {
   sliderLabels: { display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#999', marginBottom: '0.5rem' },
   moodPreview: {
     display: 'flex', alignItems: 'center', gap: '1rem',
-    padding: '0.75rem 1rem', borderRadius: '8px', border: '2px solid',
+    padding: '0.75rem 1rem', borderRadius: '8px',
     background: '#fafafa', marginTop: '0.75rem',
   },
-  moodIcon: { fontSize: '2rem' },
   tagRow: { display: 'flex', gap: '0.5rem' },
   tagInput: { flex: 1, padding: '0.5rem 0.75rem', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.9rem' },
   addBtn: { padding: '0.5rem 1rem', background: '#e8f5e9', color: '#2d7a4f', border: '1px solid #a3d9a5', borderRadius: '6px', cursor: 'pointer', fontSize: '0.9rem' },

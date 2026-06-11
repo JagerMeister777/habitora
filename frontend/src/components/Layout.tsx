@@ -2,8 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { listNotifications } from '../api/notifications';
-import { FaLeaf } from 'react-icons/fa';
-import { FiUsers, FiCloud, FiBookOpen, FiEye, FiBell, FiUser } from 'react-icons/fi';
+import { PiPlantFill, PiUsersFill, PiCloudFill, PiBookOpenTextFill, PiEyeFill, PiBellFill, PiUserFill } from 'react-icons/pi';
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   const { user, setUser } = useAuth();
@@ -25,20 +24,20 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fa' }}>
       <header style={styles.header}>
-        <Link to="/" style={styles.logo}><FaLeaf style={{ verticalAlign: 'middle', marginRight: 6 }} /> Habitora</Link>
+        <Link to="/" style={styles.logo}><PiPlantFill style={{ verticalAlign: 'middle', marginRight: 6 }} /> Habitora</Link>
         <nav style={styles.nav}>
           {user ? (
             <>
-              <Link to="/timeline" style={styles.navLink}><FiUsers style={styles.navIcon} /> みんなの投稿</Link>
-              <Link to="/forecast" style={styles.navLink}><FiCloud style={styles.navIcon} /> 天気予報</Link>
-              <Link to="/reviews" style={styles.navLink}><FiBookOpen style={styles.navIcon} /> ふり返り</Link>
-              <Link to="/consultation" style={styles.navLink}><FiEye style={styles.navIcon} /> こころの鏡</Link>
+              <Link to="/timeline" style={styles.navLink}><PiUsersFill style={styles.navIcon} /> みんなの投稿</Link>
+              <Link to="/forecast" style={styles.navLink}><PiCloudFill style={styles.navIcon} /> 天気予報</Link>
+              <Link to="/reviews" style={styles.navLink}><PiBookOpenTextFill style={styles.navIcon} /> ふり返り</Link>
+              <Link to="/consultation" style={styles.navLink}><PiEyeFill style={styles.navIcon} /> こころの鏡</Link>
               <Link to="/notifications" style={styles.navLink}>
-                <FiBell size={18} />
+                <PiBellFill size={18} />
                 {unreadCount > 0 && <span style={styles.badge}>{unreadCount}</span>}
               </Link>
               <Link to="/profile" style={styles.navLink}>
-                <FiUser style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                <PiUserFill style={{ verticalAlign: 'middle', marginRight: 4 }} />
                 {user.nickname ?? user.email.split('@')[0]}
               </Link>
               <button onClick={handleLogout} style={styles.logoutBtn}>ログアウト</button>

@@ -5,8 +5,8 @@ import { getAvatar } from '../api/avatar';
 import { useAuth } from '../context/AuthContext';
 import { PostCard } from '../components/PostCard';
 import { AvatarCard } from '../components/AvatarCard';
-import type { Post, Avatar, WeatherMood } from '../types';
-import { moodConfig } from '../utils/moodConfig';
+import type { Post, Avatar } from '../types';
+import { MoodBubble } from '../components/MoodBubble';
 import { FiStar, FiRefreshCw } from 'react-icons/fi';
 
 const MBTI_NAMES: Record<string, string> = {
@@ -104,14 +104,9 @@ export const DashboardPage = () => {
       {recentMoods.length > 0 && (
         <div style={styles.weatherRow}>
           <span style={styles.weatherLabel}>最近の天気:</span>
-          {recentMoods.map((mood, i) => {
-            const MoodIcon = (moodConfig[mood] ?? moodConfig.CLOUDY).icon;
-            return (
-              <span key={i} style={{ ...styles.weatherIcon, color: moodConfig[mood]?.text ?? '#555' }} title={mood}>
-                <MoodIcon size={24} />
-              </span>
-            );
-          })}
+          {recentMoods.map((mood, i) => (
+            <MoodBubble key={i} mood={mood} size={20} />
+          ))}
         </div>
       )}
 
@@ -149,7 +144,6 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '1.2rem', flexWrap: 'wrap',
   },
   weatherLabel: { fontSize: '0.82rem', color: '#888', marginRight: '0.25rem' },
-  weatherIcon: { display: 'inline-flex', cursor: 'default' },
   info: { textAlign: 'center', color: '#888' },
   errorText: { color: '#842029', background: '#fff0f0', padding: '0.6rem 1rem', borderRadius: '6px' },
   empty: { textAlign: 'center', padding: '3rem', color: '#888', background: '#fff', borderRadius: '12px' },

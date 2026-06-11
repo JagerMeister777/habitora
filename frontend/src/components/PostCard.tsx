@@ -2,7 +2,9 @@ import type { Post } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { CommentSection } from './CommentSection';
 import { moodConfig } from '../utils/moodConfig';
+import { MoodBubble } from './MoodBubble';
 import type { WeatherMood } from '../types';
+import { FiTrash2 } from 'react-icons/fi';
 
 interface Props {
   post: Post;
@@ -13,7 +15,6 @@ interface Props {
 export const PostCard = ({ post, onDelete, showComments = true }: Props) => {
   const { user } = useAuth();
   const config = moodConfig[post.mood as WeatherMood] ?? moodConfig.CLOUDY;
-  const Icon = config.icon;
 
   const date = new Date(post.createdAt).toLocaleDateString('ja-JP', {
     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -22,14 +23,15 @@ export const PostCard = ({ post, onDelete, showComments = true }: Props) => {
   return (
     <div style={{ ...styles.card, background: config.color, borderColor: config.border }}>
       <div style={styles.header}>
-        <span style={{ ...styles.moodBadge, color: config.text, borderColor: config.border }}>
-          <Icon size={20} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-          {config.label}
-        </span>
+        <MoodBubble mood={post.mood} size={20} />
+        <span style={{ ...styles.moodLabel, color: config.text }}>{config.label}</span>
         <span style={styles.score}>スコア: {post.feelingScore}/100</span>
         <div style={styles.actions}>
           {onDelete && user?.id === post.userId && (
-            <button onClick={() => onDelete(post.id)} style={styles.deleteBtn}>削除</button>
+            <button onClick={() => onDelete(post.id)} style={styles.deleteBtn}>
+              <FiTrash2 size={13} style={{ verticalAlign: 'middle', marginRight: 3 }} />
+              削除
+            </button>
           )}
         </div>
       </div>
@@ -57,19 +59,13 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '1.2rem',
     marginBottom: '1rem',
   },
-  header: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.6rem', flexWrap: 'wrap' },
-  moodBadge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    fontSize: '0.9rem',
-    fontWeight: 600,
-    border: '1px solid',
-    borderRadius: '20px',
-    padding: '3px 12px',
-  },
+  header: { display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem', flexWrap: 'wrap' },
+  moodLabel: { fontSize: '0.9rem', fontWeight: 700 },
   score: { fontSize: '0.82rem', color: '#666' },
   actions: { display: 'flex', gap: '0.5rem', marginLeft: 'auto', alignItems: 'center' },
   deleteBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
     background: 'none',
     border: '1px solid #ccc',
     borderRadius: '4px',

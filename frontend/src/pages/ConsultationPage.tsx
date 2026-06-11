@@ -3,15 +3,16 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { createConsultation, listConsultations, archiveConsultation } from '../api/consultation';
 import type { Consultation } from '../types';
-import { FiEye, FiMessageCircle, FiStar, FiFrown, FiAlertCircle, FiMessageSquare, FiSearch, FiEdit2 } from 'react-icons/fi';
+import { FiEye, FiMessageCircle, FiStar, FiArchive } from 'react-icons/fi';
+import { PiSmileySadFill, PiWarningCircleFill, PiChatCenteredTextFill, PiMagnifyingGlassFill, PiPencilFill } from 'react-icons/pi';
 import type { IconType } from 'react-icons';
 
 const THEMES: { key: string; label: string; icon: IconType }[] = [
-  { key: '悩み',    label: '悩み',    icon: FiFrown },
-  { key: '不安',    label: '不安',    icon: FiAlertCircle },
-  { key: '感情整理',label: '感情整理',icon: FiMessageSquare },
-  { key: '自己理解',label: '自己理解',icon: FiSearch },
-  { key: 'その他',  label: 'その他',  icon: FiEdit2 },
+  { key: '悩み',    label: '悩み',    icon: PiSmileySadFill },
+  { key: '不安',    label: '不安',    icon: PiWarningCircleFill },
+  { key: '感情整理',label: '感情整理',icon: PiChatCenteredTextFill },
+  { key: '自己理解',label: '自己理解',icon: PiMagnifyingGlassFill },
+  { key: 'その他',  label: 'その他',  icon: PiPencilFill },
 ];
 
 export const ConsultationPage = () => {
@@ -151,7 +152,9 @@ export const ConsultationPage = () => {
                   <time style={styles.historyDate}>
                     {new Date(c.submittedAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })}
                   </time>
-                  <button onClick={() => handleArchive(c.id)} style={styles.archiveBtn}>アーカイブ</button>
+                  <button onClick={() => handleArchive(c.id)} style={styles.archiveBtn}>
+                    <FiArchive size={12} style={{ verticalAlign: 'middle', marginRight: 3 }} />アーカイブ
+                  </button>
                 </div>
                 <p style={styles.historyContent}>{c.content.slice(0, 80)}{c.content.length > 80 ? '…' : ''}</p>
               </div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { submitInitialMbti, type MbtiAnswers } from '../api/mbti';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
+import { PiStarFourFill } from 'react-icons/pi';
 
 const QUESTIONS = [
   {
@@ -93,7 +94,7 @@ export const OnboardingPage = () => {
     return (
       <div style={styles.wrapper}>
         <div style={styles.card}>
-          <div style={styles.emoji}>✨</div>
+          <div style={styles.emoji}><PiStarFourFill size={48} color="#f59e0b" /></div>
           <h2 style={styles.title}>あなたのタイプは...</h2>
           <div style={styles.resultType}>{result.resultType}</div>
           <div style={styles.typeName}>「{typeName}」</div>
@@ -161,7 +162,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '10px', fontSize: '0.95rem', cursor: 'pointer', color: '#333',
     textAlign: 'left', transition: 'all 0.15s ease', fontWeight: 500,
   },
-  emoji: { fontSize: '3rem', marginBottom: '0.5rem' },
+  emoji: { display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' },
   resultType: { fontSize: '2.5rem', fontWeight: 700, color: '#2d7a4f', marginBottom: '0.5rem' },
   typeName: { fontSize: '1.2rem', color: '#555', marginBottom: '1rem' },
   resultNote: { fontSize: '0.85rem', color: '#888', lineHeight: 1.6, marginBottom: '2rem' },
