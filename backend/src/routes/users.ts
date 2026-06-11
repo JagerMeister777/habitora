@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import * as userService from '../services/user.service';
+import * as avatarService from '../services/avatar.service';
 
 const router = Router();
 
@@ -24,6 +25,15 @@ router.get('/users/:id', async (req: Request, res: Response, next: NextFunction)
   try {
     const user = await userService.getUser(Number(req.params.id));
     res.json(user);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/users/:id/avatar', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const avatar = await avatarService.getOrCreateAvatar(Number(req.params.id));
+    res.json(avatar);
   } catch (err) {
     next(err);
   }

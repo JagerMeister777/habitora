@@ -150,6 +150,19 @@ const FORECAST_COMMENTS: Record<string, string> = {
   STORM: 'この嵐も、必ず過ぎ去ります。無理しないでください。',
 };
 
+const FORECAST_SUMMARIES: Record<string, string> = {
+  SUNNY: 'この頃は気持ちが明るく開けていたようです。そんな日が続いていること、すてきですね。',
+  RAINBOW: '困難の後に光を見つけた日が多かったようです。あなたの中に、回復する力があります。',
+  STAR: '静かに自分と向き合う時間が多かったようです。その深さは、あなたの大切な部分です。',
+  SPROUT: '少しずつ、でも着実に前向きな気持ちが芽吹いていたようです。',
+  CLOUDY: 'はっきりしないもやもやした日が多かったようです。それも、ありのままの自分です。',
+  WHIRLWIND: '心が揺れ動いた日が多かったようです。少しゆっくり休んでみませんか。',
+  FOG: '方向を見失いそうな日が続いていたようです。霧はいつか晴れます。',
+  RAIN: '涙のような気持ちの日が多かったようです。自分をいたわってあげてください。',
+  SNOW: '静けさの中で、静かに耐えていたようです。その優しさが、あなたらしさです。',
+  STORM: '激しい感情と向き合う日が続いていたようです。嵐の後には、必ず空が開けます。',
+};
+
 const REVIEW_COMMENTS: Record<string, string> = {
   SUNNY: 'とても輝かしい月でしたね。その笑顔、大切にしてください。',
   RAINBOW: '乗り越えた証が虹になりました。あなたは強いです。',
@@ -175,6 +188,7 @@ async function main() {
   // Clear all data in dependency order
   await prisma.notification.deleteMany();
   await prisma.thank.deleteMany();
+  await prisma.comment.deleteMany();
   await prisma.feelingAnalysis.deleteMany();
   await prisma.consultation.deleteMany();
   await prisma.review.deleteMany();
@@ -229,31 +243,81 @@ async function main() {
   ]);
   console.log('✅ Avatars (5)');
 
-  // ── Thanks & Notifications ─────────────────────────────────────────────────
+  // ── Comments ───────────────────────────────────────────────────────────────
   const users = [haruka, taichi, miori, kento, aoi];
-  let thankCount = 0;
 
-  for (const sender of users) {
-    const targets = publicPosts.filter((p) => p.userId !== sender.id).slice(0, 4);
-    for (const target of targets) {
-      const createdAt = daysAgo(Math.floor(Math.random() * 5) + 1);
-      const thank = await prisma.thank.create({
-        data: { postId: target.id, fromUserId: sender.id, toUserId: target.userId, kindnessScore: 3, createdAt },
+  const commentTemplates = [
+    '気持ちを共有してくれてありがとうございます。一緒に乗り越えましょう！',
+    'その気持ち、よく分かります。無理せず自分のペースで。',
+    '読んでいて、すごく伝わってきました。ゆっくり休んでね。',
+    '素直に表現できるって、とても素晴らしいことだと思います。',
+    'いつも応援しています。あなたの感情は大切なものです。',
+    '今日も一歩一歩、着実に進んでいますね。',
+    '同じような気持ちになることあります。一人じゃないよ。',
+    'この投稿を見て、自分も勇気をもらいました。ありがとう。',
+    '感情を言葉にするって難しいのに、上手く伝わりました。',
+    '今日の気持ちを大切にしてね。明日はきっと違う風景が見えるはず。',
+    'あなたの正直な気持ちが、読んでいて心に刺さりました。',
+    '一緒に少しずつ前に進みましょう。応援しています！',
+  ];
+
+  let commentCount = 0;
+  let thankCount = 0;
+  const createdComments: Array<{ id: number; postId: number; userId: number }> = [];
+
+  for (const post of publicPosts) {
+    const commenters = users.filter((u) => u.id !== post.userId);
+    const numComments = Math.floor(Math.random() * 3) + 1;
+    for (let i = 0; i < numComments && i < commenters.length; i++) {
+      const commenter = commenters[i];
+      const template = commentTemplates[(commentCount) % commentTemplates.length];
+      const createdAt = daysAgo(Math.floor(Math.random() * 4) + 1);
+      const comment = await prisma.comment.create({
+        data: { postId: post.id, userId: commenter.id, text: template, isHidden: false, createdAt },
       });
-      const recipient = users.find((u) => u.id === target.userId)!;
+      createdComments.push({ id: comment.id, postId: post.id, userId: commenter.id });
       await prisma.notification.create({
         data: {
-          userId: target.userId,
+          userId: post.userId,
+          type: 'COMMENT',
+          title: 'コメントが届きました',
+          message: `${commenter.nickname} さんがコメントしました。`,
+          relatedObjectId: comment.id,
+          relatedObjectType: 'COMMENT',
+          isRead: Math.random() > 0.5,
+          createdAt,
+        },
+      });
+      commentCount++;
+    }
+  }
+  console.log(`✅ Comments (${commentCount})`);
+
+  // ── Thanks & Notifications ─────────────────────────────────────────────────
+  // 投稿主のみ、自分の投稿についたコメントにありがとうを送れる仕様
+  for (const post of publicPosts) {
+    const postAuthor = users.find((u) => u.id === post.userId)!;
+    const commentsOnPost = createdComments.filter(
+      (c) => c.postId === post.id && c.userId !== post.userId,
+    );
+    for (const c of commentsOnPost) {
+      const createdAt = daysAgo(Math.floor(Math.random() * 3) + 1);
+      const thank = await prisma.thank.create({
+        data: { commentId: c.id, fromUserId: post.userId, toUserId: c.userId, kindnessScore: 3, createdAt },
+      });
+      await prisma.notification.create({
+        data: {
+          userId: c.userId,
           type: 'THANK',
           title: 'ありがとうが届きました',
-          message: `${sender.nickname} さんからありがとうをもらいました。`,
+          message: `${postAuthor.nickname} さんからありがとうをもらいました。`,
           relatedObjectId: thank.id,
           relatedObjectType: 'Thank',
           isRead: Math.random() > 0.5,
           createdAt,
         },
       });
-      await prisma.user.update({ where: { id: recipient.id }, data: { kindnessTotal: { increment: 3 } } });
+      await prisma.user.update({ where: { id: c.userId }, data: { kindnessTotal: { increment: 3 } } });
       thankCount++;
     }
   }
@@ -274,7 +338,6 @@ async function main() {
 
   for (const { user, defs } of allUserDefs) {
     const mainMood = computeMainMood(defs);
-    const avgScore = Math.round(defs.reduce((s, p) => s + p.score, 0) / defs.length);
     const moodTrend: Record<string, string> = {};
     defs.slice(0, 7).forEach((p) => {
       const key = daysAgo(p.days).toISOString().split('T')[0];
@@ -287,7 +350,7 @@ async function main() {
         endDate: today,
         mainMood,
         moodTrendJson: JSON.stringify(moodTrend),
-        emotionSummary: `直近30日間（${defs.length}件）の平均スコアは${avgScore}点です。`,
+        emotionSummary: FORECAST_SUMMARIES[mainMood] ?? '',
         avatarComment: FORECAST_COMMENTS[mainMood] ?? '',
       },
     });

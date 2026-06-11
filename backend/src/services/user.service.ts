@@ -11,6 +11,9 @@ const toResponse = (user: {
   mbtiType: string | null;
   level: number;
   kindnessTotal: number;
+  penaltyCount: number;
+  isRestricted: boolean;
+  reDiagnosisNeeded: boolean;
   registeredAt: Date;
 }): UserResponse => ({
   id: user.id,
@@ -19,6 +22,9 @@ const toResponse = (user: {
   mbtiType: user.mbtiType,
   level: user.level,
   kindnessTotal: user.kindnessTotal,
+  penaltyCount: user.penaltyCount,
+  isRestricted: user.isRestricted,
+  reDiagnosisNeeded: user.reDiagnosisNeeded,
   registeredAt: user.registeredAt,
 });
 

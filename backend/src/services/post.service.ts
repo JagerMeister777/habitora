@@ -4,6 +4,19 @@ import { resolveMood } from '../utils/mood';
 
 const prisma = new PrismaClient();
 
+const MOOD_TO_EXPRESSION: Record<string, string> = {
+  STORM:     'ANGRY',
+  RAIN:      'SAD',
+  SNOW:      'SAD',
+  FOG:       'ANXIOUS',
+  CLOUDY:    'NEUTRAL',
+  WHIRLWIND: 'ANXIOUS',
+  SPROUT:    'HOPEFUL',
+  RAINBOW:   'HAPPY',
+  STAR:      'DREAMY',
+  SUNNY:     'CHEERFUL',
+};
+
 const parseKeywords = (raw: string): string[] => {
   try { return JSON.parse(raw) as string[]; } catch { return []; }
 };
@@ -31,6 +44,31 @@ const toResponse = (post: {
 const requireUser = async (userId: number): Promise<void> => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user || user.isDeleted) throw new AppError(404, 'ユーザーが見つかりませんでした。');
+};
+
+const INTROVERT_MOODS = ['STAR', 'FOG', 'SNOW', 'RAIN', 'CLOUDY'];
+const EXTROVERT_MOODS = ['SUNNY', 'RAINBOW', 'STORM', 'WHIRLWIND'];
+
+const checkAndUpdateReDiagnosis = async (userId: number): Promise<void> => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user?.mbtiType) return;
+
+  const recentPosts = await prisma.post.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    select: { mood: true },
+  });
+  if (recentPosts.length < 5) return;
+
+  const introCount = recentPosts.filter((p) => INTROVERT_MOODS.includes(p.mood)).length;
+  const extroCount = recentPosts.filter((p) => EXTROVERT_MOODS.includes(p.mood)).length;
+  const isExtrovert = user.mbtiType.startsWith('E');
+  const threshold = Math.ceil(recentPosts.length * 0.7);
+
+  if ((isExtrovert && introCount >= threshold) || (!isExtrovert && extroCount >= threshold)) {
+    await prisma.user.update({ where: { id: userId }, data: { reDiagnosisNeeded: true } });
+  }
 };
 
 const buildEmotionVector = (feelingScore: number): string => {
@@ -89,11 +127,14 @@ export const createPost = async (data: {
     },
   });
 
+  const expression = MOOD_TO_EXPRESSION[mood] ?? 'NEUTRAL';
   await prisma.avatar.upsert({
     where: { userId: data.userId },
-    create: { userId: data.userId, mood, fixedType: null },
-    update: { mood, updatedAt: new Date() },
+    create: { userId: data.userId, mood, expression, fixedType: null },
+    update: { mood, expression, updatedAt: new Date() },
   });
+
+  await checkAndUpdateReDiagnosis(data.userId);
 
   return toResponse(post);
 };

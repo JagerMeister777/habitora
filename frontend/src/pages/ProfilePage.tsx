@@ -3,6 +3,19 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { request } from '../api/client';
 import type { User } from '../types';
+import { FiUser, FiHeart } from 'react-icons/fi';
+
+const KINDNESS_BADGES = [
+  { min: 50, label: '星の優しさ', color: '#f59e0b' },
+  { min: 20, label: '実りの優しさ', color: '#16a34a' },
+  { min: 10, label: '花の優しさ', color: '#ec4899' },
+  { min: 5,  label: '若葉の優しさ', color: '#22c55e' },
+  { min: 1,  label: '芽の優しさ', color: '#84cc16' },
+  { min: 0,  label: '種の優しさ', color: '#a8a29e' },
+] as const;
+
+const getKindnessBadge = (total: number) =>
+  KINDNESS_BADGES.find((b) => total >= b.min) ?? KINDNESS_BADGES[KINDNESS_BADGES.length - 1];
 
 export const ProfilePage = () => {
   const { user, setUser } = useAuth();
@@ -45,14 +58,27 @@ export const ProfilePage = () => {
 
   return (
     <div style={styles.wrap}>
-      <h2 style={styles.heading}>👤 プロフィール</h2>
+      <h2 style={styles.heading}><FiUser size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} /> プロフィール</h2>
 
       <div style={styles.statsRow}>
         <div style={styles.stat}><span style={styles.statNum}>Lv.{user.level}</span><span style={styles.statLabel}>レベル</span></div>
-        <div style={styles.stat}><span style={styles.statNum}>{user.kindnessTotal}</span><span style={styles.statLabel}>優しさ合計</span></div>
+        <div style={styles.stat}>
+          {(() => {
+            const badge = getKindnessBadge(user.kindnessTotal);
+            return (
+              <>
+                <span style={{ ...styles.statNum, color: badge.color, fontSize: '1rem' }}>
+                  <FiHeart size={16} style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                  {badge.label}
+                </span>
+                <span style={styles.statLabel}>{user.kindnessTotal}回のありがとう</span>
+              </>
+            );
+          })()}
+        </div>
         <div style={styles.stat}>
           <span style={styles.statNum}>{mbtiLabel}</span>
-          <span style={styles.statLabel}>MBTIタイプ</span>
+          <span style={styles.statLabel}>性格タイプ（仮）</span>
         </div>
       </div>
 

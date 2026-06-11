@@ -3,10 +3,16 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { generateReview, listReviews } from '../api/reviews';
 import type { Review } from '../types';
+import { moodConfig } from '../utils/moodConfig';
+import type { WeatherMood } from '../types';
+import { FiBookOpen, FiStar, FiMessageCircle } from 'react-icons/fi';
 
-const moodIcon: Record<string, string> = {
-  STORM: '⛈️', RAIN: '🌧️', SNOW: '❄️', FOG: '🌫️', CLOUDY: '⛅',
-  WHIRLWIND: '🌪️', SPROUT: '🌻', RAINBOW: '🌈', STAR: '🌟', SUNNY: '☀️',
+const scoreToQualitative = (avg: number): string => {
+  if (avg >= 90) return 'とても晴れやかな気持ちの月でした。';
+  if (avg >= 70) return '穏やかで前向きな気持ちが続いた月でした。';
+  if (avg >= 50) return '穏やかな日と揺れる日が混ざり合った月でした。';
+  if (avg >= 30) return '少し重さや揺れを感じる日が多かった月でした。';
+  return '心が重く感じることが多い月でした。自分をいたわってあげてください。';
 };
 
 export const ReviewPage = () => {
@@ -57,13 +63,13 @@ export const ReviewPage = () => {
 
   return (
     <div>
-      <h2 style={styles.heading}>📖 ふり返り</h2>
+      <h2 style={styles.heading}><FiBookOpen size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} /> ふり返り</h2>
 
       <div style={styles.generateBox}>
         <p style={styles.generateDesc}>今月の記録をもとにふり返りを生成します。</p>
         {genError && <p style={styles.error}>{genError}</p>}
         <button onClick={handleGenerate} disabled={generating} style={styles.generateBtn}>
-          {generating ? '生成中...' : '✨ 今月のふり返りを生成'}
+          {generating ? '生成中...' : <><FiStar size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> 今月のふり返りを生成</>}
         </button>
       </div>
 
@@ -84,15 +90,15 @@ export const ReviewPage = () => {
               <div key={r.id} style={styles.card}>
                 <div style={styles.cardHeader}>
                   <span style={styles.period}>{period}</span>
-                  {mm && <span style={styles.moodIcon}>{moodIcon[mm] ?? '⛅'}</span>}
+                  {mm && (() => { const MC = (moodConfig[mm as WeatherMood] ?? moodConfig.CLOUDY); const MI = MC.icon; return <span style={{ ...styles.moodIcon, color: MC.text }}><MI size={26} /></span>; })()}
                   {r.levelChange > 0 && <span style={styles.levelBadge}>+{r.levelChange} Lv UP!</span>}
                 </div>
                 {r.summaryText && <p style={styles.summary}>{r.summaryText}</p>}
                 {h && (
-                  <p style={styles.score}>平均スコア: <strong>{h.avg}点</strong></p>
+                  <p style={styles.score}>{scoreToQualitative(h.avg)}</p>
                 )}
                 {r.avatarComment && (
-                  <p style={styles.avatarComment}>💬 {r.avatarComment}</p>
+                  <p style={styles.avatarComment}><FiMessageCircle size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {r.avatarComment}</p>
                 )}
                 <time style={styles.reviewedAt}>
                   生成日: {new Date(r.reviewedAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })}
@@ -118,7 +124,7 @@ const styles: Record<string, React.CSSProperties> = {
   card: { background: '#fff', border: '1px solid #eee', borderRadius: '12px', padding: '1.2rem' },
   cardHeader: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' },
   period: { fontWeight: 700, fontSize: '1rem', color: '#333' },
-  moodIcon: { fontSize: '1.5rem' },
+  moodIcon: { display: 'inline-flex' },
   levelBadge: { marginLeft: 'auto', background: '#fef3c7', color: '#d97706', fontSize: '0.8rem', fontWeight: 700, padding: '2px 10px', borderRadius: '10px', border: '1px solid #fcd34d' },
   summary: { margin: '0 0 0.5rem', color: '#444', fontSize: '0.95rem', lineHeight: 1.6 },
   score: { margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#555' },

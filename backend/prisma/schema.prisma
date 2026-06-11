@@ -17,10 +17,13 @@ model User {
   commentStyle      String?
   level             Int             @default(1)
   kindnessTotal     Int             @default(0)
+  penaltyCount      Int             @default(0)
+  isRestricted      Boolean         @default(false)
   reDiagnosisNeeded Boolean         @default(false)
   registeredAt      DateTime        @default(now())
   isDeleted         Boolean         @default(false)
   posts             Post[]
+  comments          Comment[]
   avatar            Avatar?
   diagnoses         MBTIDiagnosis[]
   attributeLogs     AttributeLog[]
@@ -44,9 +47,39 @@ model Post {
   isVisible       Boolean          @default(false)
   createdAt       DateTime         @default(now())
   analysis        FeelingAnalysis?
-  thanks          Thank[]
+  comments        Comment[]
 
   @@map("post")
+}
+
+model Comment {
+  id           Int      @id @default(autoincrement())
+  postId       Int
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+  text         String
+  isHidden     Boolean  @default(false)
+  hiddenReason String?
+  createdAt    DateTime @default(now())
+  thanks       Thank[]
+
+  @@map("comment")
+}
+
+model Thank {
+  id            Int      @id @default(autoincrement())
+  commentId     Int
+  comment       Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  fromUserId    Int
+  fromUser      User     @relation("ThanksGiven", fields: [fromUserId], references: [id])
+  toUserId      Int
+  message       String?
+  kindnessScore Int      @default(3)
+  createdAt     DateTime @default(now())
+
+  @@unique([commentId, fromUserId])
+  @@map("thanks")
 }
 
 model FeelingAnalysis {
@@ -91,20 +124,6 @@ model MoodForecast {
   forecastedAt   DateTime @default(now())
 
   @@map("mood_forecast")
-}
-
-model Thank {
-  id            Int      @id @default(autoincrement())
-  postId        Int
-  post          Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  fromUserId    Int
-  fromUser      User     @relation("ThanksGiven", fields: [fromUserId], references: [id])
-  toUserId      Int
-  message       String?
-  kindnessScore Int      @default(3)
-  createdAt     DateTime @default(now())
-
-  @@map("thanks")
 }
 
 model MBTIDiagnosis {
