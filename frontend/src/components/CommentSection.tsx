@@ -4,6 +4,7 @@ import { listComments, createComment } from '../api/comments';
 import { sendThank } from '../api/thanks';
 import { ApiError } from '../api/client';
 import type { Comment } from '../types';
+import { FiMessageCircle, FiHeart, FiAlertTriangle } from 'react-icons/fi';
 
 interface Props {
   postId: number;
@@ -60,7 +61,8 @@ export const CommentSection = ({ postId }: Props) => {
   return (
     <div style={styles.wrap}>
       <button onClick={() => setOpen((o) => !o)} style={styles.toggle}>
-        💬 コメント{open ? 'を閉じる' : `を見る${commentCount > 0 ? `（${commentCount}件）` : ''}`}
+        <FiMessageCircle size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+        コメント{open ? 'を閉じる' : `を見る${commentCount > 0 ? `（${commentCount}件）` : ''}`}
       </button>
 
       {open && (
@@ -84,12 +86,13 @@ export const CommentSection = ({ postId }: Props) => {
                     disabled={thankedIds.has(c.id)}
                     style={{ ...styles.thankBtn, opacity: thankedIds.has(c.id) ? 0.5 : 1 }}
                   >
-                    {thankedIds.has(c.id) ? '💛 送った' : '💛 ありがとう'}
+                    <FiHeart size={12} style={{ verticalAlign: 'middle', marginRight: 3 }} />
+                    {thankedIds.has(c.id) ? '送った' : 'ありがとう'}
                     {c.thankCount > 0 && <span style={styles.thankCount}> {c.thankCount}</span>}
                   </button>
                 )}
                 {user && user.id === c.userId && c.thankCount > 0 && (
-                  <span style={styles.thankReceived}>💛 {c.thankCount}</span>
+                  <span style={styles.thankReceived}><FiHeart size={12} style={{ verticalAlign: 'middle', marginRight: 2 }} /> {c.thankCount}</span>
                 )}
               </div>
               <p style={styles.commentText}>{c.text}</p>
@@ -98,7 +101,7 @@ export const CommentSection = ({ postId }: Props) => {
 
           {user && (
             user.isRestricted ? (
-              <p style={styles.restricted}>⚠️ 違反が繰り返されたため、コメントの投稿が制限されています。</p>
+              <p style={styles.restricted}><FiAlertTriangle size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> 違反が繰り返されたため、コメントの投稿が制限されています。</p>
             ) : (
               <form onSubmit={handleSubmit} style={styles.form}>
                 <textarea

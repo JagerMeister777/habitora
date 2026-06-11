@@ -1,19 +1,8 @@
-import type { Post, WeatherMood } from '../types';
+import type { Post } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { CommentSection } from './CommentSection';
-
-const moodConfig: Record<WeatherMood, { icon: string; label: string; color: string; border: string; text: string }> = {
-  STORM:     { icon: '⛈️',  label: '嵐',       color: '#ffebee', border: '#ef9a9a', text: '#b71c1c' },
-  RAIN:      { icon: '🌧️', label: '雨',       color: '#e3f2fd', border: '#90caf9', text: '#1565c0' },
-  SNOW:      { icon: '❄️',  label: '雪',       color: '#f3f8ff', border: '#b3d4f5', text: '#37474f' },
-  FOG:       { icon: '🌫️', label: '霧',       color: '#f5f5f5', border: '#bdbdbd', text: '#424242' },
-  CLOUDY:    { icon: '⛅',  label: 'くもり',   color: '#fff8e1', border: '#ffe082', text: '#5d4037' },
-  WHIRLWIND: { icon: '🌪️', label: 'つむじ風', color: '#fff3e0', border: '#ffcc80', text: '#e65100' },
-  SPROUT:    { icon: '🌻',  label: '芽吹き',   color: '#f1f8e9', border: '#aed581', text: '#33691e' },
-  RAINBOW:   { icon: '🌈',  label: '虹',       color: '#fce4ec', border: '#f48fb1', text: '#880e4f' },
-  STAR:      { icon: '🌟',  label: '星空',     color: '#e8eaf6', border: '#9fa8da', text: '#283593' },
-  SUNNY:     { icon: '☀️',  label: '晴れ',     color: '#e8f5e9', border: '#a5d6a7', text: '#1b5e20' },
-};
+import { moodConfig } from '../utils/moodConfig';
+import type { WeatherMood } from '../types';
 
 interface Props {
   post: Post;
@@ -23,7 +12,8 @@ interface Props {
 
 export const PostCard = ({ post, onDelete, showComments = true }: Props) => {
   const { user } = useAuth();
-  const config = moodConfig[post.mood] ?? moodConfig.CLOUDY;
+  const config = moodConfig[post.mood as WeatherMood] ?? moodConfig.CLOUDY;
+  const Icon = config.icon;
 
   const date = new Date(post.createdAt).toLocaleDateString('ja-JP', {
     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -33,7 +23,8 @@ export const PostCard = ({ post, onDelete, showComments = true }: Props) => {
     <div style={{ ...styles.card, background: config.color, borderColor: config.border }}>
       <div style={styles.header}>
         <span style={{ ...styles.moodBadge, color: config.text, borderColor: config.border }}>
-          {config.icon} {config.label}
+          <Icon size={20} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+          {config.label}
         </span>
         <span style={styles.score}>スコア: {post.feelingScore}/100</span>
         <div style={styles.actions}>
@@ -68,6 +59,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   header: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.6rem', flexWrap: 'wrap' },
   moodBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
     fontSize: '0.9rem',
     fontWeight: 600,
     border: '1px solid',

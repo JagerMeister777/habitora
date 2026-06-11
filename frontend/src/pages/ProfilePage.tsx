@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { request } from '../api/client';
 import type { User } from '../types';
+import { FiUser } from 'react-icons/fi';
 
 export const ProfilePage = () => {
   const { user, setUser } = useAuth();
@@ -45,7 +46,7 @@ export const ProfilePage = () => {
 
   return (
     <div style={styles.wrap}>
-      <h2 style={styles.heading}>👤 プロフィール</h2>
+      <h2 style={styles.heading}><FiUser size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} /> プロフィール</h2>
 
       <div style={styles.statsRow}>
         <div style={styles.stat}><span style={styles.statNum}>Lv.{user.level}</span><span style={styles.statLabel}>レベル</span></div>

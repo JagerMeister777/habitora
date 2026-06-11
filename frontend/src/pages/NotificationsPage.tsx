@@ -3,12 +3,15 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { listNotifications, markNotificationRead } from '../api/notifications';
 import type { Notification } from '../types';
+import { FiHeart, FiCalendar, FiCloud, FiAward, FiBell } from 'react-icons/fi';
+import type { IconType } from 'react-icons';
 
-const typeIcon: Record<string, string> = {
-  THANK: '💛',
-  REMINDER: '📅',
-  MOOD: '⛅',
-  ACHIEVEMENT: '✨',
+const typeIcon: Record<string, IconType> = {
+  THANK: FiHeart,
+  REMINDER: FiCalendar,
+  MOOD: FiCloud,
+  ACHIEVEMENT: FiAward,
+  COMMENT: FiAward,
 };
 
 export const NotificationsPage = () => {
@@ -39,7 +42,7 @@ export const NotificationsPage = () => {
 
   return (
     <div>
-      <h2 style={styles.heading}>🔔 通知</h2>
+      <h2 style={styles.heading}><FiBell size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} /> 通知</h2>
       {notifications.length === 0 ? (
         <div style={styles.empty}>
           <p>通知はまだありません。</p>
@@ -53,7 +56,7 @@ export const NotificationsPage = () => {
               style={{ ...styles.item, background: n.isRead ? '#f9f9f9' : '#fffde7', cursor: n.isRead ? 'default' : 'pointer' }}
               onClick={() => handleClick(n)}
             >
-              <span style={styles.icon}>{typeIcon[n.type] ?? '🔔'}</span>
+              <span style={styles.icon}>{(() => { const NI = typeIcon[n.type] ?? FiBell; return <NI size={20} />; })()}</span>
               <div style={styles.body}>
                 <p style={styles.title}>{n.title}</p>
                 <p style={styles.message}>{n.message}</p>
@@ -76,7 +79,7 @@ const styles: Record<string, React.CSSProperties> = {
   empty: { textAlign: 'center', padding: '3rem 1rem', color: '#777', background: '#fff', borderRadius: '12px', border: '1px solid #eee' },
   list: { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' },
   item: { display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '1rem', borderRadius: '10px', border: '1px solid #eee', transition: 'background 0.15s' },
-  icon: { fontSize: '1.4rem', flexShrink: 0 },
+  icon: { flexShrink: 0, display: 'flex', alignItems: 'center', color: '#2d7a4f' },
   body: { flex: 1 },
   title: { margin: '0 0 0.25rem', fontWeight: 600, fontSize: '0.95rem', color: '#333' },
   message: { margin: '0 0 0.4rem', fontSize: '0.88rem', color: '#555' },

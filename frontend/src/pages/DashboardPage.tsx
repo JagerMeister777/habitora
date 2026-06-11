@@ -4,17 +4,14 @@ import { getPostsByUser, deletePost } from '../api/posts';
 import { useAuth } from '../context/AuthContext';
 import { PostCard } from '../components/PostCard';
 import type { Post, WeatherMood } from '../types';
+import { moodConfig } from '../utils/moodConfig';
+import { FiStar } from 'react-icons/fi';
 
 const MBTI_NAMES: Record<string, string> = {
   INFP: '優しき理想家', INFJ: '静かな導き手', ISFP: '感性のアーティスト', ISFJ: '世話好きな癒し手',
   INTP: '知の探求者', INTJ: '静かな野心家', ISTP: '静かなる実行者', ISTJ: '堅実な守り人',
   ENFP: '夢見る冒険者', ENFJ: '共鳴する応援者', ESFP: '陽気なひまわり', ESFJ: '頼れるお姉さん',
   ENTP: 'ひらめきの火花', ENTJ: 'ビジョンの指揮官', ESTP: 'アクションスター', ESTJ: '現実主義の管理者',
-};
-
-const moodIcon: Record<WeatherMood, string> = {
-  STORM: '⛈️', RAIN: '🌧️', SNOW: '❄️', FOG: '🌫️', CLOUDY: '⛅',
-  WHIRLWIND: '🌪️', SPROUT: '🌻', RAINBOW: '🌈', STAR: '🌟', SUNNY: '☀️',
 };
 
 export const DashboardPage = () => {
@@ -58,13 +55,14 @@ export const DashboardPage = () => {
           </h2>
           {user.mbtiType && (
             <div style={styles.mbtiBadge}>
-              ✨ {user.mbtiType}
+              <FiStar size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+              {user.mbtiType}
               {MBTI_NAMES[user.mbtiType] && <span style={styles.mbtiName}> 「{MBTI_NAMES[user.mbtiType]}」</span>}
             </div>
           )}
           {!user.mbtiType && (
             <Link to="/onboarding" style={styles.mbtiLink}>
-              ✨ 性格タイプを診断する →
+              <FiStar size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} /> 性格タイプを診断する →
             </Link>
           )}
         </div>
@@ -74,11 +72,14 @@ export const DashboardPage = () => {
       {recentMoods.length > 0 && (
         <div style={styles.weatherRow}>
           <span style={styles.weatherLabel}>最近の天気:</span>
-          {recentMoods.map((mood, i) => (
-            <span key={i} style={styles.weatherIcon} title={mood}>
-              {moodIcon[mood]}
-            </span>
-          ))}
+          {recentMoods.map((mood, i) => {
+            const MoodIcon = (moodConfig[mood] ?? moodConfig.CLOUDY).icon;
+            return (
+              <span key={i} style={{ ...styles.weatherIcon, color: moodConfig[mood]?.text ?? '#555' }} title={mood}>
+                <MoodIcon size={24} />
+              </span>
+            );
+          })}
         </div>
       )}
 
@@ -116,7 +117,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '1.2rem', flexWrap: 'wrap',
   },
   weatherLabel: { fontSize: '0.82rem', color: '#888', marginRight: '0.25rem' },
-  weatherIcon: { fontSize: '1.4rem', cursor: 'default' },
+  weatherIcon: { display: 'inline-flex', cursor: 'default' },
   info: { textAlign: 'center', color: '#888' },
   errorText: { color: '#842029', background: '#fff0f0', padding: '0.6rem 1rem', borderRadius: '6px' },
   empty: { textAlign: 'center', padding: '3rem', color: '#888', background: '#fff', borderRadius: '12px' },

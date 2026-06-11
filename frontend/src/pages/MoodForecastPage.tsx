@@ -3,15 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { getMoodForecast, regenerateForecast } from '../api/moodForecast';
 import type { MoodForecast } from '../types';
-
-const moodIcon: Record<string, string> = {
-  STORM: '⛈️', RAIN: '🌧️', SNOW: '❄️', FOG: '🌫️', CLOUDY: '⛅',
-  WHIRLWIND: '🌪️', SPROUT: '🌻', RAINBOW: '🌈', STAR: '🌟', SUNNY: '☀️',
-};
-const moodLabel: Record<string, string> = {
-  STORM: '嵐', RAIN: '雨', SNOW: '雪', FOG: '霧', CLOUDY: 'くもり',
-  WHIRLWIND: 'つむじ風', SPROUT: '芽吹き', RAINBOW: '虹', STAR: '星空', SUNNY: '晴れ',
-};
+import { moodConfig } from '../utils/moodConfig';
+import type { WeatherMood } from '../types';
+import { FiCloud, FiRefreshCw, FiMessageCircle } from 'react-icons/fi';
 
 export const MoodForecastPage = () => {
   const { user } = useAuth();
@@ -59,13 +53,13 @@ export const MoodForecastPage = () => {
 
   return (
     <div>
-      <h2 style={styles.heading}>⛅ 気持ち天気予報</h2>
+      <h2 style={styles.heading}><FiCloud size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} /> 気持ち天気予報</h2>
 
       <div style={styles.mainCard}>
-        <div style={styles.bigIcon}>{moodIcon[forecast.mainMood] ?? '⛅'}</div>
-        <div style={styles.mainMoodLabel}>{moodLabel[forecast.mainMood] ?? forecast.mainMood}</div>
+        {(() => { const mc = moodConfig[forecast.mainMood as WeatherMood] ?? moodConfig.CLOUDY; const MI = mc.icon; return <div style={{ ...styles.bigIcon, color: mc.text }}><MI size={72} /></div>; })()}
+        <div style={styles.mainMoodLabel}>{(moodConfig[forecast.mainMood as WeatherMood] ?? moodConfig.CLOUDY).label}</div>
         {forecast.avatarComment && (
-          <p style={styles.avatarComment}>💬 {forecast.avatarComment}</p>
+          <p style={styles.avatarComment}><FiMessageCircle size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {forecast.avatarComment}</p>
         )}
       </div>
 
@@ -73,14 +67,18 @@ export const MoodForecastPage = () => {
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>直近7日間の天気</h3>
           <div style={styles.trendRow}>
-            {trendEntries.map(([date, mood]) => (
-              <div key={date} style={styles.trendItem}>
-                <span style={styles.trendIcon}>{moodIcon[mood] ?? '⛅'}</span>
-                <span style={styles.trendDate}>
-                  {new Date(date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}
-                </span>
-              </div>
-            ))}
+            {trendEntries.map(([date, mood]) => {
+              const mc = moodConfig[mood as WeatherMood] ?? moodConfig.CLOUDY;
+              const MI = mc.icon;
+              return (
+                <div key={date} style={styles.trendItem}>
+                  <span style={{ ...styles.trendIcon, color: mc.text }}><MI size={28} /></span>
+                  <span style={styles.trendDate}>
+                    {new Date(date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -93,7 +91,7 @@ export const MoodForecastPage = () => {
       )}
 
       <button onClick={handleRegenerate} disabled={refreshing} style={styles.refreshBtn}>
-        {refreshing ? '更新中...' : '🔄 今すぐ更新する'}
+        {refreshing ? '更新中...' : <><FiRefreshCw size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> 今すぐ更新する</>}
       </button>
 
       <p style={styles.footerNote}>
@@ -108,14 +106,14 @@ const styles: Record<string, React.CSSProperties> = {
   center: { textAlign: 'center', marginTop: '3rem', color: '#666' },
   errorBox: { textAlign: 'center', padding: '3rem 1rem', background: '#fff', borderRadius: '12px', border: '1px solid #eee' },
   mainCard: { textAlign: 'center', background: '#fff', border: '1px solid #eee', borderRadius: '16px', padding: '2.5rem 1rem', marginBottom: '1.5rem' },
-  bigIcon: { fontSize: '4rem', lineHeight: 1 },
+  bigIcon: { lineHeight: 1, display: 'flex', justifyContent: 'center' },
   mainMoodLabel: { fontSize: '1.4rem', fontWeight: 700, color: '#333', marginTop: '0.5rem' },
   avatarComment: { marginTop: '1rem', color: '#555', fontSize: '0.95rem', lineHeight: 1.6, fontStyle: 'italic' },
   section: { background: '#fff', border: '1px solid #eee', borderRadius: '12px', padding: '1.2rem', marginBottom: '1rem' },
   sectionTitle: { margin: '0 0 1rem', fontSize: '0.95rem', color: '#555', fontWeight: 600 },
   trendRow: { display: 'flex', gap: '0.5rem', flexWrap: 'wrap' },
   trendItem: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', minWidth: '44px' },
-  trendIcon: { fontSize: '1.6rem' },
+  trendIcon: { display: 'inline-flex' },
   trendDate: { fontSize: '0.72rem', color: '#888' },
   summaryText: { margin: 0, color: '#444', fontSize: '0.95rem', lineHeight: 1.7 },
   refreshBtn: { display: 'block', width: '100%', padding: '0.8rem', background: '#2d7a4f', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', marginBottom: '0.75rem' },

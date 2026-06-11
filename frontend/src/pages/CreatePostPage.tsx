@@ -4,6 +4,8 @@ import { createPost } from '../api/posts';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
 import type { WeatherMood } from '../types';
+import { moodConfig } from '../utils/moodConfig';
+import { FiGlobe } from 'react-icons/fi';
 
 const resolveMood = (score: number): WeatherMood => {
   if (score <= 10) return 'STORM';
@@ -18,17 +20,17 @@ const resolveMood = (score: number): WeatherMood => {
   return 'SUNNY';
 };
 
-const moodInfo: Record<WeatherMood, { icon: string; label: string; desc: string; color: string }> = {
-  STORM:     { icon: '⛈️',  label: '嵐',       desc: '怒り・動揺を感じています',     color: '#b71c1c' },
-  RAIN:      { icon: '🌧️', label: '雨',       desc: '悲しい・寂しい気持ちです',     color: '#1565c0' },
-  SNOW:      { icon: '❄️',  label: '雪',       desc: '静かな寂しさがあります',       color: '#37474f' },
-  FOG:       { icon: '🌫️', label: '霧',       desc: '混乱・疲れを感じています',     color: '#424242' },
-  CLOUDY:    { icon: '⛅',  label: 'くもり',   desc: 'ぼんやり・静かな気持ちです',   color: '#5d4037' },
-  WHIRLWIND: { icon: '🌪️', label: 'つむじ風', desc: '少し焦りを感じています',       color: '#e65100' },
-  SPROUT:    { icon: '🌻',  label: '芽吹き',   desc: '小さな前向きさがあります',     color: '#33691e' },
-  RAINBOW:   { icon: '🌈',  label: '虹',       desc: '癒し・希望を感じています',     color: '#880e4f' },
-  STAR:      { icon: '🌟',  label: '星空',     desc: '穏やかに思索しています',       color: '#283593' },
-  SUNNY:     { icon: '☀️',  label: '晴れ',     desc: '安心・前向きな気持ちです',     color: '#1b5e20' },
+const moodDesc: Record<WeatherMood, string> = {
+  STORM:     '怒り・動揺を感じています',
+  RAIN:      '悲しい・寂しい気持ちです',
+  SNOW:      '静かな寂しさがあります',
+  FOG:       '混乱・疲れを感じています',
+  CLOUDY:    'ぼんやり・静かな気持ちです',
+  WHIRLWIND: '少し焦りを感じています',
+  SPROUT:    '小さな前向きさがあります',
+  RAINBOW:   '癒し・希望を感じています',
+  STAR:      '穏やかに思索しています',
+  SUNNY:     '安心・前向きな気持ちです',
 };
 
 const MAX_CHARS = 250;
@@ -45,7 +47,9 @@ export const CreatePostPage = () => {
   const [loading, setLoading] = useState(false);
 
   const mood = resolveMood(feelingScore);
-  const info = moodInfo[mood];
+  const info = moodConfig[mood];
+  const desc = moodDesc[mood];
+  const MoodIcon = info.icon;
   const charsLeft = MAX_CHARS - text.length;
 
   const addKeyword = () => {
@@ -113,11 +117,11 @@ export const CreatePostPage = () => {
             <span>100 (最高)</span>
           </div>
 
-          <div style={{ ...styles.moodPreview, borderColor: info.color }}>
-            <span style={styles.moodIcon}>{info.icon}</span>
+          <div style={{ ...styles.moodPreview, borderColor: info.text }}>
+            <span style={styles.moodIcon}><MoodIcon size={36} color={info.text} /></span>
             <div>
-              <div style={{ fontWeight: 700, color: info.color }}>{info.label}</div>
-              <div style={{ fontSize: '0.82rem', color: '#666' }}>{info.desc}</div>
+              <div style={{ fontWeight: 700, color: info.text }}>{info.label}</div>
+              <div style={{ fontSize: '0.82rem', color: '#666' }}>{desc}</div>
             </div>
           </div>
 
@@ -150,7 +154,7 @@ export const CreatePostPage = () => {
 
           <label style={styles.visibleLabel}>
             <div style={styles.toggleRow}>
-              <span>👥 みんなに公開する</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><FiGlobe size={16} /> みんなに公開する</span>
               <div
                 role="switch"
                 aria-checked={isVisible}

@@ -4,6 +4,7 @@ import { register } from '../api/users';
 import { login } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
+import { FaLeaf } from 'react-icons/fa';
 
 export const RegisterPage = () => {
   const { setUser } = useAuth();
@@ -38,7 +39,7 @@ export const RegisterPage = () => {
   return (
     <div style={styles.wrapper}>
       <div style={styles.card}>
-        <h1 style={styles.title}>🌱 Habitora</h1>
+        <h1 style={styles.title}><FaLeaf style={{ verticalAlign: 'middle', marginRight: 8 }} /> Habitora</h1>
         <p style={styles.subtitle}>新規登録</p>
         {error && <div style={styles.error}>{error}</div>}
         <form onSubmit={handleSubmit}>
