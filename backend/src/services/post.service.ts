@@ -4,6 +4,19 @@ import { resolveMood } from '../utils/mood';
 
 const prisma = new PrismaClient();
 
+const MOOD_TO_EXPRESSION: Record<string, string> = {
+  STORM:     'ANGRY',
+  RAIN:      'SAD',
+  SNOW:      'SAD',
+  FOG:       'ANXIOUS',
+  CLOUDY:    'NEUTRAL',
+  WHIRLWIND: 'ANXIOUS',
+  SPROUT:    'HOPEFUL',
+  RAINBOW:   'HAPPY',
+  STAR:      'DREAMY',
+  SUNNY:     'CHEERFUL',
+};
+
 const parseKeywords = (raw: string): string[] => {
   try { return JSON.parse(raw) as string[]; } catch { return []; }
 };
@@ -114,10 +127,11 @@ export const createPost = async (data: {
     },
   });
 
+  const expression = MOOD_TO_EXPRESSION[mood] ?? 'NEUTRAL';
   await prisma.avatar.upsert({
     where: { userId: data.userId },
-    create: { userId: data.userId, mood, fixedType: null },
-    update: { mood, updatedAt: new Date() },
+    create: { userId: data.userId, mood, expression, fixedType: null },
+    update: { mood, expression, updatedAt: new Date() },
   });
 
   await checkAndUpdateReDiagnosis(data.userId);
