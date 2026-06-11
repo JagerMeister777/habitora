@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 本番MySQL切替時: provider を "mysql" に変更し DATABASE_URL を更新
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int             @id @default(autoincrement())
+  email             String          @unique
+  password          String
+  nickname          String?
+  mbtiType          String?
+  commentStyle      String?
+  level             Int             @default(1)
+  kindnessTotal     Int             @default(0)
+  reDiagnosisNeeded Boolean         @default(false)
+  registeredAt      DateTime        @default(now())
+  isDeleted         Boolean         @default(false)
+  posts             Post[]
+  avatar            Avatar?
+  diagnoses         MBTIDiagnosis[]
+  attributeLogs     AttributeLog[]
+  reviews           Review[]
+  notifications     Notification[]
+  consultations     Consultation[]
+  moodForecasts     MoodForecast[]
+  thanksGiven       Thank[]         @relation("ThanksGiven")
+
+  @@map("users")
+}
+
+model Post {
+  id              Int              @id @default(autoincrement())
+  userId          Int
+  user            User             @relation(fields: [userId], references: [id])
+  text            String
+  feelingScore    Int
+  mood            String
+  emotionKeywords String           @default("[]")
+  isVisible       Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  analysis        FeelingAnalysis?
+  thanks          Thank[]
+
+  @@map("post")
+}
+
+model FeelingAnalysis {
+  id                Int      @id @default(autoincrement())
+  postId            Int      @unique
+  post              Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  emotionScore      Int
+  emotionVectorJson String   @default("{}")
+  mood              String
+  reasonText        String?
+  suggestedWords    String   @default("[]")
+  analyzedAt        DateTime @default(now())
+
+  @@map("feeling_analysis")
+}
+
+model Avatar {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fixedType    String?
+  level        Int      @default(1)
+  mood         String   @default("SUNNY")
+  expression   String   @default("NEUTRAL")
+  itemsJson    String   @default("[]")
+  commentStyle String   @default("GENTLE")
+  updatedAt    DateTime @default(now())
+
+  @@map("avatars")
+}
+
+model MoodForecast {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id])
+  startDate      DateTime
+  endDate        DateTime
+  mainMood       String
+  moodTrendJson  String   @default("{}")
+  emotionSummary String?
+  avatarComment  String?
+  forecastedAt   DateTime @default(now())
+
+  @@map("mood_forecast")
+}
+
+model Thank {
+  id            Int      @id @default(autoincrement())
+  postId        Int
+  post          Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  fromUserId    Int
+  fromUser      User     @relation("ThanksGiven", fields: [fromUserId], references: [id])
+  toUserId      Int
+  message       String?
+  kindnessScore Int      @default(3)
+  createdAt     DateTime @default(now())
+
+  @@map("thanks")
+}
+
+model MBTIDiagnosis {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id])
+  diagnosisType    String
+  resultType       String
+  resultVectorJson String   @default("{}")
+  reasoningText    String?
+  diagnosedAt      DateTime @default(now())
+
+  @@map("mbti_diagnosis")
+}
+
+model AttributeLog {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id])
+  fromType         String
+  toType           String
+  changeVectorJson String   @default("{}")
+  reasonKeywords   String   @default("[]")
+  changeComment    String?
+  loggedAt         DateTime @default(now())
+
+  @@map("attribute_log")
+}
+
+model Review {
+  id                   Int      @id @default(autoincrement())
+  userId               Int
+  user                 User     @relation(fields: [userId], references: [id])
+  periodStart          DateTime
+  periodEnd            DateTime
+  summaryText          String?
+  selectedPostIdsJson  String   @default("[]")
+  highlightFeelingJson String   @default("{}")
+  avatarComment        String?
+  levelChange          Int      @default(0)
+  reviewedAt           DateTime @default(now())
+
+  @@map("review")
+}
+
+model Consultation {
+  id                Int      @id @default(autoincrement())
+  userId            Int
+  user              User     @relation(fields: [userId], references: [id])
+  title             String?
+  content           String
+  selectedTheme     String?
+  guidanceType      String?
+  guidanceStepsJson String   @default("[]")
+  insightSummary    String?
+  avatarReaction    String?
+  isArchived        Boolean  @default(false)
+  submittedAt       DateTime @default(now())
+
+  @@map("consultation")
+}
+
+model Notification {
+  id                Int      @id @default(autoincrement())
+  userId            Int
+  user              User     @relation(fields: [userId], references: [id])
+  type              String
+  title             String
+  message           String
+  isRead            Boolean  @default(false)
+  relatedObjectId   Int?
+  relatedObjectType String?
+  createdAt         DateTime @default(now())
+
+  @@map("notification")
+}
