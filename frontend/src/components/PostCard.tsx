@@ -45,7 +45,7 @@ export const PostCard = ({ post, onDelete, showComments = true }: Props) => {
       )}
       <time style={styles.date}>{date}</time>
 
-      {showComments && <CommentSection postId={post.id} />}
+      {showComments && <CommentSection postId={post.id} postAuthorId={post.userId} />}
     </div>
   );
 };

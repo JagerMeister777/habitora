@@ -28,10 +28,14 @@ export const createThank = async (
 ): Promise<ThankResponse> => {
   const comment = await prisma.comment.findUnique({
     where: { id: commentId },
-    include: { user: { select: { nickname: true } } },
+    include: {
+      user: { select: { nickname: true } },
+      post: { select: { userId: true } },
+    },
   });
   if (!comment) throw new AppError(404, 'コメントが見つかりませんでした。');
   if (comment.isHidden) throw new AppError(400, 'このコメントにはありがとうを送れません。');
+  if (comment.post.userId !== fromUserId) throw new AppError(403, '投稿主のみありがとうを送れます。');
   if (comment.userId === fromUserId) throw new AppError(400, '自分のコメントにはありがとうできません。');
 
   const already = await prisma.thank.findUnique({ where: { commentId_fromUserId: { commentId, fromUserId } } });

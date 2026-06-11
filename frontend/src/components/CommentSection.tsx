@@ -8,9 +8,10 @@ import { FiMessageCircle, FiHeart, FiAlertTriangle } from 'react-icons/fi';
 
 interface Props {
   postId: number;
+  postAuthorId: number;
 }
 
-export const CommentSection = ({ postId }: Props) => {
+export const CommentSection = ({ postId, postAuthorId }: Props) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -80,7 +81,7 @@ export const CommentSection = ({ postId }: Props) => {
                 <time style={styles.date}>
                   {new Date(c.createdAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </time>
-                {user && user.id !== c.userId && (
+                {user && user.id === postAuthorId && user.id !== c.userId && (
                   <button
                     onClick={() => handleThank(c.id)}
                     disabled={thankedIds.has(c.id)}

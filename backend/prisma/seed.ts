@@ -281,19 +281,23 @@ async function main() {
   console.log(`✅ Comments (${commentCount})`);
 
   // ── Thanks & Notifications ─────────────────────────────────────────────────
-  for (const sender of users) {
-    const targetComments = createdComments.filter((c) => c.userId !== sender.id).slice(0, 5);
-    for (const c of targetComments) {
+  // 投稿主のみ、自分の投稿についたコメントにありがとうを送れる仕様
+  for (const post of publicPosts) {
+    const postAuthor = users.find((u) => u.id === post.userId)!;
+    const commentsOnPost = createdComments.filter(
+      (c) => c.postId === post.id && c.userId !== post.userId,
+    );
+    for (const c of commentsOnPost) {
       const createdAt = daysAgo(Math.floor(Math.random() * 3) + 1);
       const thank = await prisma.thank.create({
-        data: { commentId: c.id, fromUserId: sender.id, toUserId: c.userId, kindnessScore: 3, createdAt },
+        data: { commentId: c.id, fromUserId: post.userId, toUserId: c.userId, kindnessScore: 3, createdAt },
       });
       await prisma.notification.create({
         data: {
           userId: c.userId,
           type: 'THANK',
           title: 'ありがとうが届きました',
-          message: `${sender.nickname} さんからありがとうをもらいました。`,
+          message: `${postAuthor.nickname} さんからありがとうをもらいました。`,
           relatedObjectId: thank.id,
           relatedObjectType: 'Thank',
           isRead: Math.random() > 0.5,
