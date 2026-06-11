@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import type { Post, WeatherMood } from '../types';
-import { sendThank } from '../api/thanks';
 import { useAuth } from '../context/AuthContext';
+import { CommentSection } from './CommentSection';
 
 const moodConfig: Record<WeatherMood, { icon: string; label: string; color: string; border: string; text: string }> = {
   STORM:     { icon: '⛈️',  label: '嵐',       color: '#ffebee', border: '#ef9a9a', text: '#b71c1c' },
@@ -19,32 +18,16 @@ const moodConfig: Record<WeatherMood, { icon: string; label: string; color: stri
 interface Props {
   post: Post;
   onDelete?: (id: number) => void;
-  onThank?: (postId: number) => void;
-  showThankBtn?: boolean;
+  showComments?: boolean;
 }
 
-export const PostCard = ({ post, onDelete, showThankBtn }: Props) => {
+export const PostCard = ({ post, onDelete, showComments = true }: Props) => {
   const { user } = useAuth();
   const config = moodConfig[post.mood] ?? moodConfig.CLOUDY;
-  const [thankDone, setThankDone] = useState(false);
-  const [thankLoading, setThankLoading] = useState(false);
 
   const date = new Date(post.createdAt).toLocaleDateString('ja-JP', {
     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
   });
-
-  const handleThank = async () => {
-    if (!user || thankDone) return;
-    setThankLoading(true);
-    try {
-      await sendThank(post.id, user.id);
-      setThankDone(true);
-    } catch {
-      // already thanked or self-post — ignore
-    } finally {
-      setThankLoading(false);
-    }
-  };
 
   return (
     <div style={{ ...styles.card, background: config.color, borderColor: config.border }}>
@@ -54,16 +37,7 @@ export const PostCard = ({ post, onDelete, showThankBtn }: Props) => {
         </span>
         <span style={styles.score}>スコア: {post.feelingScore}/100</span>
         <div style={styles.actions}>
-          {showThankBtn && user && user.id !== post.userId && (
-            <button
-              onClick={handleThank}
-              disabled={thankDone || thankLoading}
-              style={{ ...styles.thankBtn, opacity: thankDone ? 0.5 : 1 }}
-            >
-              {thankDone ? '💛 送った' : '💛 ありがとう'}
-            </button>
-          )}
-          {onDelete && (
+          {onDelete && user?.id === post.userId && (
             <button onClick={() => onDelete(post.id)} style={styles.deleteBtn}>削除</button>
           )}
         </div>
@@ -79,6 +53,8 @@ export const PostCard = ({ post, onDelete, showThankBtn }: Props) => {
         </div>
       )}
       <time style={styles.date}>{date}</time>
+
+      {showComments && <CommentSection postId={post.id} />}
     </div>
   );
 };
@@ -100,16 +76,6 @@ const styles: Record<string, React.CSSProperties> = {
   },
   score: { fontSize: '0.82rem', color: '#666' },
   actions: { display: 'flex', gap: '0.5rem', marginLeft: 'auto', alignItems: 'center' },
-  thankBtn: {
-    background: 'none',
-    border: '1px solid #f9c74f',
-    borderRadius: '4px',
-    padding: '2px 10px',
-    cursor: 'pointer',
-    fontSize: '0.8rem',
-    color: '#e09000',
-    fontWeight: 600,
-  },
   deleteBtn: {
     background: 'none',
     border: '1px solid #ccc',

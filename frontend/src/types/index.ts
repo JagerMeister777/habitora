@@ -17,6 +17,8 @@ export interface User {
   mbtiType: string | null;
   level: number;
   kindnessTotal: number;
+  penaltyCount: number;
+  isRestricted: boolean;
   registeredAt: string;
 }
 
@@ -31,9 +33,20 @@ export interface Post {
   createdAt: string;
 }
 
-export interface Thank {
+export interface Comment {
   id: number;
   postId: number;
+  userId: number;
+  authorNickname: string | null;
+  text: string;
+  isHidden: boolean;
+  createdAt: string;
+  thankCount: number;
+}
+
+export interface Thank {
+  id: number;
+  commentId: number;
   fromUserId: number;
   toUserId: number;
   message: string | null;

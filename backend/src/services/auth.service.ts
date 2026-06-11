@@ -22,6 +22,8 @@ export const login = async (email: string, password: string): Promise<UserRespon
     mbtiType: user.mbtiType,
     level: user.level,
     kindnessTotal: user.kindnessTotal,
+    penaltyCount: user.penaltyCount,
+    isRestricted: user.isRestricted,
     registeredAt: user.registeredAt,
   };
 };

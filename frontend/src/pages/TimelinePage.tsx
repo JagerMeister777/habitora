@@ -44,7 +44,7 @@ export const TimelinePage = () => {
   return (
     <div>
       <h2 style={styles.heading}>👥 みんなの投稿</h2>
-      <p style={styles.desc}>公開されている気持ちの記録です。「ありがとう」を送って優しさを届けましょう。</p>
+      <p style={styles.desc}>公開されている気持ちの記録です。コメントして「ありがとう」を届けましょう。</p>
 
       {posts.length === 0 ? (
         <div style={styles.empty}>
@@ -56,7 +56,7 @@ export const TimelinePage = () => {
       ) : (
         <>
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} showThankBtn={true} />
+            <PostCard key={post.id} post={post} />
           ))}
           {hasMore && (
             <button onClick={handleLoadMore} disabled={loadingMore} style={styles.moreBtn}>

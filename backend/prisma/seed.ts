@@ -175,6 +175,7 @@ async function main() {
   // Clear all data in dependency order
   await prisma.notification.deleteMany();
   await prisma.thank.deleteMany();
+  await prisma.comment.deleteMany();
   await prisma.feelingAnalysis.deleteMany();
   await prisma.consultation.deleteMany();
   await prisma.review.deleteMany();
@@ -229,21 +230,67 @@ async function main() {
   ]);
   console.log('✅ Avatars (5)');
 
-  // ── Thanks & Notifications ─────────────────────────────────────────────────
+  // ── Comments ───────────────────────────────────────────────────────────────
   const users = [haruka, taichi, miori, kento, aoi];
-  let thankCount = 0;
 
-  for (const sender of users) {
-    const targets = publicPosts.filter((p) => p.userId !== sender.id).slice(0, 4);
-    for (const target of targets) {
-      const createdAt = daysAgo(Math.floor(Math.random() * 5) + 1);
-      const thank = await prisma.thank.create({
-        data: { postId: target.id, fromUserId: sender.id, toUserId: target.userId, kindnessScore: 3, createdAt },
+  const commentTemplates = [
+    '気持ちを共有してくれてありがとうございます。一緒に乗り越えましょう！',
+    'その気持ち、よく分かります。無理せず自分のペースで。',
+    '読んでいて、すごく伝わってきました。ゆっくり休んでね。',
+    '素直に表現できるって、とても素晴らしいことだと思います。',
+    'いつも応援しています。あなたの感情は大切なものです。',
+    '今日も一歩一歩、着実に進んでいますね。',
+    '同じような気持ちになることあります。一人じゃないよ。',
+    'この投稿を見て、自分も勇気をもらいました。ありがとう。',
+    '感情を言葉にするって難しいのに、上手く伝わりました。',
+    '今日の気持ちを大切にしてね。明日はきっと違う風景が見えるはず。',
+    'あなたの正直な気持ちが、読んでいて心に刺さりました。',
+    '一緒に少しずつ前に進みましょう。応援しています！',
+  ];
+
+  let commentCount = 0;
+  let thankCount = 0;
+  const createdComments: Array<{ id: number; postId: number; userId: number }> = [];
+
+  for (const post of publicPosts) {
+    const commenters = users.filter((u) => u.id !== post.userId);
+    const numComments = Math.floor(Math.random() * 3) + 1;
+    for (let i = 0; i < numComments && i < commenters.length; i++) {
+      const commenter = commenters[i];
+      const template = commentTemplates[(commentCount) % commentTemplates.length];
+      const createdAt = daysAgo(Math.floor(Math.random() * 4) + 1);
+      const comment = await prisma.comment.create({
+        data: { postId: post.id, userId: commenter.id, text: template, isHidden: false, createdAt },
       });
-      const recipient = users.find((u) => u.id === target.userId)!;
+      createdComments.push({ id: comment.id, postId: post.id, userId: commenter.id });
       await prisma.notification.create({
         data: {
-          userId: target.userId,
+          userId: post.userId,
+          type: 'COMMENT',
+          title: 'コメントが届きました',
+          message: `${commenter.nickname} さんがコメントしました。`,
+          relatedObjectId: comment.id,
+          relatedObjectType: 'COMMENT',
+          isRead: Math.random() > 0.5,
+          createdAt,
+        },
+      });
+      commentCount++;
+    }
+  }
+  console.log(`✅ Comments (${commentCount})`);
+
+  // ── Thanks & Notifications ─────────────────────────────────────────────────
+  for (const sender of users) {
+    const targetComments = createdComments.filter((c) => c.userId !== sender.id).slice(0, 5);
+    for (const c of targetComments) {
+      const createdAt = daysAgo(Math.floor(Math.random() * 3) + 1);
+      const thank = await prisma.thank.create({
+        data: { commentId: c.id, fromUserId: sender.id, toUserId: c.userId, kindnessScore: 3, createdAt },
+      });
+      await prisma.notification.create({
+        data: {
+          userId: c.userId,
           type: 'THANK',
           title: 'ありがとうが届きました',
           message: `${sender.nickname} さんからありがとうをもらいました。`,
@@ -253,7 +300,7 @@ async function main() {
           createdAt,
         },
       });
-      await prisma.user.update({ where: { id: recipient.id }, data: { kindnessTotal: { increment: 3 } } });
+      await prisma.user.update({ where: { id: c.userId }, data: { kindnessTotal: { increment: 3 } } });
       thankCount++;
     }
   }
