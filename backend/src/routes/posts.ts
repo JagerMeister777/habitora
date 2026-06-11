@@ -9,6 +9,7 @@ const createSchema = z.object({
   text: z.string().min(1, '本文を入力してください。').max(250, '本文は250文字以内で入力してください。'),
   feelingScore: z.number().int().min(0).max(100, '感情スコアは0〜100で入力してください。'),
   emotionKeywords: z.array(z.string()).optional(),
+  isVisible: z.boolean().optional(),
 });
 
 const updateSchema = z.object({
@@ -16,6 +17,17 @@ const updateSchema = z.object({
   feelingScore: z.number().int().min(0).max(100),
   emotionKeywords: z.array(z.string()).optional(),
   isVisible: z.boolean().optional(),
+});
+
+router.get('/posts/timeline', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const limit = Math.min(Number(req.query.limit) || 20, 20);
+    const cursor = req.query.cursor ? Number(req.query.cursor) : undefined;
+    const posts = await postService.getTimeline(limit, cursor);
+    res.json(posts);
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post('/posts', async (req: Request, res: Response, next: NextFunction) => {
