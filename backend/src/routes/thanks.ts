@@ -9,7 +9,7 @@ const createSchema = z.object({
   message: z.string().max(100).optional(),
 });
 
-router.post('/posts/:id/thank', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/comments/:id/thank', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { fromUserId, message } = createSchema.parse(req.body);
     const thank = await thankService.createThank(Number(req.params.id), fromUserId, message);
@@ -19,7 +19,7 @@ router.post('/posts/:id/thank', async (req: Request, res: Response, next: NextFu
   }
 });
 
-router.get('/posts/:id/thanks', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/comments/:id/thanks', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const thanks = await thankService.listThanks(Number(req.params.id));
     res.json(thanks);

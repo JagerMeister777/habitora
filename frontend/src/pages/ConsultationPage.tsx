@@ -3,13 +3,16 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { createConsultation, listConsultations, archiveConsultation } from '../api/consultation';
 import type { Consultation } from '../types';
+import { FiEye, FiMessageCircle, FiStar, FiArchive } from 'react-icons/fi';
+import { PiSmileySadFill, PiWarningCircleFill, PiChatCenteredTextFill, PiMagnifyingGlassFill, PiPencilFill } from 'react-icons/pi';
+import type { IconType } from 'react-icons';
 
-const THEMES = [
-  { key: '悩み', label: '😔 悩み' },
-  { key: '不安', label: '😰 不安' },
-  { key: '感情整理', label: '💭 感情整理' },
-  { key: '自己理解', label: '🔍 自己理解' },
-  { key: 'その他', label: '✏️ その他' },
+const THEMES: { key: string; label: string; icon: IconType }[] = [
+  { key: '悩み',    label: '悩み',    icon: PiSmileySadFill },
+  { key: '不安',    label: '不安',    icon: PiWarningCircleFill },
+  { key: '感情整理',label: '感情整理',icon: PiChatCenteredTextFill },
+  { key: '自己理解',label: '自己理解',icon: PiMagnifyingGlassFill },
+  { key: 'その他',  label: 'その他',  icon: PiPencilFill },
 ];
 
 export const ConsultationPage = () => {
@@ -64,23 +67,27 @@ export const ConsultationPage = () => {
 
   return (
     <div>
-      <h2 style={styles.heading}>🪞 こころの鏡</h2>
+      <h2 style={styles.heading}><FiEye size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} /> こころの鏡</h2>
 
       {!activeConsultation ? (
         <form onSubmit={handleSubmit} style={styles.form}>
           <p style={styles.desc}>今の気持ちをテーマを選んで話しかけてみてください。</p>
 
           <div style={styles.themeRow}>
-            {THEMES.map((t) => (
-              <button
-                key={t.key}
-                type="button"
-                onClick={() => setTheme(t.key)}
-                style={{ ...styles.themeChip, ...(theme === t.key ? styles.themeChipActive : {}) }}
-              >
-                {t.label}
-              </button>
-            ))}
+            {THEMES.map((t) => {
+              const TI = t.icon;
+              return (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTheme(t.key)}
+                  style={{ ...styles.themeChip, ...(theme === t.key ? styles.themeChipActive : {}) }}
+                >
+                  <TI size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                  {t.label}
+                </button>
+              );
+            })}
           </div>
 
           <textarea
@@ -95,13 +102,13 @@ export const ConsultationPage = () => {
           {submitError && <p style={styles.error}>{submitError}</p>}
 
           <button type="submit" disabled={submitting} style={styles.submitBtn}>
-            {submitting ? '送信中...' : '💬 話しかける'}
+            {submitting ? '送信中...' : <><FiMessageCircle size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> 話しかける</>}
           </button>
         </form>
       ) : (
         <div style={styles.guidanceBox}>
           {activeConsultation.avatarReaction && (
-            <p style={styles.avatarReaction}>💬 {activeConsultation.avatarReaction}</p>
+            <p style={styles.avatarReaction}><FiMessageCircle size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {activeConsultation.avatarReaction}</p>
           )}
 
           <div style={styles.stepProgress}>
@@ -123,7 +130,7 @@ export const ConsultationPage = () => {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
                 {activeConsultation.insightSummary && (
-                  <p style={styles.insight}>✨ {activeConsultation.insightSummary}</p>
+                  <p style={styles.insight}><FiStar size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> {activeConsultation.insightSummary}</p>
                 )}
                 <button onClick={() => setActiveConsultation(null)} style={{ ...styles.stepBtn, ...styles.stepBtnPrimary }}>
                   新しい相談をする
@@ -145,7 +152,9 @@ export const ConsultationPage = () => {
                   <time style={styles.historyDate}>
                     {new Date(c.submittedAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' })}
                   </time>
-                  <button onClick={() => handleArchive(c.id)} style={styles.archiveBtn}>アーカイブ</button>
+                  <button onClick={() => handleArchive(c.id)} style={styles.archiveBtn}>
+                    <FiArchive size={12} style={{ verticalAlign: 'middle', marginRight: 3 }} />アーカイブ
+                  </button>
                 </div>
                 <p style={styles.historyContent}>{c.content.slice(0, 80)}{c.content.length > 80 ? '…' : ''}</p>
               </div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { submitInitialMbti, type MbtiAnswers } from '../api/mbti';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
+import { PiStarFourFill } from 'react-icons/pi';
 
 const QUESTIONS = [
   {
@@ -93,7 +94,7 @@ export const OnboardingPage = () => {
     return (
       <div style={styles.wrapper}>
         <div style={styles.card}>
-          <div style={styles.emoji}>✨</div>
+          <div style={styles.emoji}><PiStarFourFill size={48} color="#f59e0b" /></div>
           <h2 style={styles.title}>あなたのタイプは...</h2>
           <div style={styles.resultType}>{result.resultType}</div>
           <div style={styles.typeName}>「{typeName}」</div>
@@ -128,7 +129,8 @@ export const OnboardingPage = () => {
         <div style={styles.progressBar}>
           <div style={{ ...styles.progressFill, width: `${((step + 1) / QUESTIONS.length) * 100}%` }} />
         </div>
-        <h2 style={styles.title}>あなたのことを教えてください</h2>
+        <h2 style={styles.title}>はじめの仮診断</h2>
+        <p style={styles.subtitle}>これは「今のあなた」のスタートポイントです。記録を重ねるうちに、より深く自分を知ることができます。</p>
         {error && <div style={styles.error}>{error}</div>}
         <p style={styles.question}>{q.question}</p>
         <div style={styles.options}>
@@ -151,7 +153,8 @@ const styles: Record<string, React.CSSProperties> = {
   progress: { fontSize: '0.8rem', color: '#aaa', marginBottom: '0.5rem' },
   progressBar: { height: '4px', background: '#e0e0e0', borderRadius: '2px', marginBottom: '2rem', overflow: 'hidden' },
   progressFill: { height: '100%', background: '#2d7a4f', borderRadius: '2px', transition: 'width 0.3s ease' },
-  title: { color: '#333', marginBottom: '1.5rem', fontSize: '1.1rem' },
+  title: { color: '#333', marginBottom: '0.5rem', fontSize: '1.1rem' },
+  subtitle: { fontSize: '0.82rem', color: '#888', lineHeight: 1.5, marginBottom: '1.25rem' },
   question: { fontSize: '1rem', color: '#444', lineHeight: 1.6, marginBottom: '1.5rem' },
   options: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
   option: {
@@ -159,7 +162,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '10px', fontSize: '0.95rem', cursor: 'pointer', color: '#333',
     textAlign: 'left', transition: 'all 0.15s ease', fontWeight: 500,
   },
-  emoji: { fontSize: '3rem', marginBottom: '0.5rem' },
+  emoji: { display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' },
   resultType: { fontSize: '2.5rem', fontWeight: 700, color: '#2d7a4f', marginBottom: '0.5rem' },
   typeName: { fontSize: '1.2rem', color: '#555', marginBottom: '1rem' },
   resultNote: { fontSize: '0.85rem', color: '#888', lineHeight: 1.6, marginBottom: '2rem' },

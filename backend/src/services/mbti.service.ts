@@ -25,7 +25,7 @@ export const createInitialDiagnosis = async (
 
   await prisma.user.update({
     where: { id: userId },
-    data: { mbtiType: typeCode },
+    data: { mbtiType: typeCode, reDiagnosisNeeded: false },
   });
 
   await prisma.avatar.upsert({

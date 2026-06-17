@@ -12,6 +12,7 @@ import avatarRouter from './routes/avatar';
 import reviewsRouter from './routes/reviews';
 import moodForecastRouter from './routes/mood-forecast';
 import consultationRouter from './routes/consultation';
+import commentsRouter from './routes/comments';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api', avatarRouter);
 app.use('/api', reviewsRouter);
 app.use('/api', moodForecastRouter);
 app.use('/api', consultationRouter);
+app.use('/api', commentsRouter);
 
 app.use(errorHandler);
 

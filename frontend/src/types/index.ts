@@ -17,7 +17,22 @@ export interface User {
   mbtiType: string | null;
   level: number;
   kindnessTotal: number;
+  penaltyCount: number;
+  isRestricted: boolean;
+  reDiagnosisNeeded: boolean;
   registeredAt: string;
+}
+
+export interface Avatar {
+  id: number;
+  userId: number;
+  fixedType: string | null;
+  level: number;
+  mood: string;
+  expression: string;
+  itemsJson: string;
+  commentStyle: string;
+  updatedAt: string;
 }
 
 export interface Post {
@@ -31,9 +46,21 @@ export interface Post {
   createdAt: string;
 }
 
-export interface Thank {
+export interface Comment {
   id: number;
   postId: number;
+  userId: number;
+  authorNickname: string | null;
+  text: string;
+  isHidden: boolean;
+  createdAt: string;
+  thankCount: number;
+  isThankedByAuthor: boolean;
+}
+
+export interface Thank {
+  id: number;
+  commentId: number;
   fromUserId: number;
   toUserId: number;
   message: string | null;

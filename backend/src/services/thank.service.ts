@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 const toResponse = (thank: {
   id: number;
-  postId: number;
+  commentId: number;
   fromUserId: number;
   toUserId: number;
   message: string | null;
@@ -13,7 +13,7 @@ const toResponse = (thank: {
   createdAt: Date;
 }): ThankResponse => ({
   id: thank.id,
-  postId: thank.postId,
+  commentId: thank.commentId,
   fromUserId: thank.fromUserId,
   toUserId: thank.toUserId,
   message: thank.message,
@@ -22,59 +22,71 @@ const toResponse = (thank: {
 });
 
 export const createThank = async (
-  postId: number,
+  commentId: number,
   fromUserId: number,
   message?: string,
 ): Promise<ThankResponse> => {
-  const post = await prisma.post.findUnique({ where: { id: postId } });
-  if (!post) throw new AppError(404, '投稿が見つかりませんでした。');
+  const comment = await prisma.comment.findUnique({
+    where: { id: commentId },
+    include: {
+      user: { select: { nickname: true } },
+      post: { select: { userId: true } },
+    },
+  });
+  if (!comment) throw new AppError(404, 'コメントが見つかりませんでした。');
+  if (comment.isHidden) throw new AppError(400, 'このコメントにはありがとうを送れません。');
+  if (comment.post.userId !== fromUserId) throw new AppError(403, '投稿主のみありがとうを送れます。');
+  if (comment.userId === fromUserId) throw new AppError(400, '自分のコメントにはありがとうできません。');
 
-  if (post.userId === fromUserId) {
-    throw new AppError(400, '自分の投稿にありがとうはできません。');
-  }
-
-  const already = await prisma.thank.findFirst({ where: { postId, fromUserId } });
+  const already = await prisma.thank.findUnique({ where: { commentId_fromUserId: { commentId, fromUserId } } });
   if (already) throw new AppError(409, 'すでにありがとうを送っています。');
+
+  const thanksOnPostCount = await prisma.thank.count({
+    where: { fromUserId, comment: { postId: comment.postId } },
+  });
+  if (thanksOnPostCount >= 5) throw new AppError(400, '1つの投稿に対してありがとうは最大5件までです。');
+
+  const sender = await prisma.user.findUnique({ where: { id: fromUserId } });
 
   const thank = await prisma.thank.create({
     data: {
-      postId,
+      commentId,
       fromUserId,
-      toUserId: post.userId,
+      toUserId: comment.userId,
       message: message ?? null,
       kindnessScore: 3,
     },
   });
 
   await prisma.user.update({
-    where: { id: post.userId },
+    where: { id: comment.userId },
     data: { kindnessTotal: { increment: 1 } },
   });
 
   await prisma.notification.create({
     data: {
-      userId: post.userId,
-      type: 'THANK_RECEIVED',
+      userId: comment.userId,
+      type: 'THANK',
       title: 'ありがとうが届きました',
       message: message
-        ? `「${message}」というメッセージが届きました。`
-        : 'あなたの投稿にありがとうが届きました。',
-      relatedObjectId: postId,
-      relatedObjectType: 'POST',
+        ? `${sender?.nickname ?? 'だれか'} さんから「${message}」というメッセージが届きました。`
+        : `${sender?.nickname ?? 'だれか'} さんからありがとうをもらいました。`,
+      relatedObjectId: thank.id,
+      relatedObjectType: 'Thank',
     },
   });
 
   return toResponse(thank);
 };
 
-export const listThanks = async (postId: number): Promise<ThankResponse[]> => {
-  const post = await prisma.post.findUnique({ where: { id: postId } });
-  if (!post) throw new AppError(404, '投稿が見つかりませんでした。');
+export const listThanks = async (commentId: number): Promise<ThankResponse[]> => {
+  const comment = await prisma.comment.findUnique({ where: { id: commentId } });
+  if (!comment) throw new AppError(404, 'コメントが見つかりませんでした。');
 
   const thanks = await prisma.thank.findMany({
-    where: { postId },
+    where: { commentId },
     orderBy: { createdAt: 'desc' },
-    take: 5,
+    take: 10,
   });
   return thanks.map(toResponse);
 };
